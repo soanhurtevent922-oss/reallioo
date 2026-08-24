@@ -145,9 +145,9 @@ export async function POST(request: Request) {
     }
     openAIForm.append("prompt", generationPrompt(prompt, Boolean(referenceFile)));
     openAIForm.append("size", "1152x2048");
-    openAIForm.append("quality", "medium");
+    openAIForm.append("quality", "high");
     openAIForm.append("output_format", "webp");
-    openAIForm.append("output_compression", "95");
+    openAIForm.append("output_compression", "100");
     openAIForm.append("n", "1");
 
     const openAIResponse = await fetch("https://api.openai.com/v1/images/edits", {
