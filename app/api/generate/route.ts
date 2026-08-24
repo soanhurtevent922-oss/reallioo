@@ -20,22 +20,38 @@ function isImageFile(value: FormDataEntryValue | null): value is File {
 }
 
 function generationPrompt(userPrompt: string, hasReference: boolean) {
-  return `Edit the first image, which is the source scene. ${
+  return `ROLE
+You are performing a precise photorealistic edit, not creating a new scene.
+
+INPUTS
+- Image 1 is the authoritative source photograph. Its person, anatomy, pose, camera, framing and environment must remain unchanged.
+${
     hasReference
-      ? "The second image is a visual reference only: use it to reproduce the requested person, vehicle, clothing, object, colors or design accurately, without copying its background."
-      : "There is no separate reference image."
+      ? "- Image 2 is the reference subject. Reproduce only the requested object/person/vehicle/clothing from it. Never copy Image 2's background, framing, lighting or studio presentation."
+      : "- No separate reference image is supplied."
   }
 
-User request: ${userPrompt}
+USER EDIT
+${userPrompt}
 
-Production requirements:
-- Create one highly photorealistic image in native iPhone/TikTok vertical 9:16 composition.
-- Preserve the source image's real adult identities, facial features, body proportions, camera position, framing, perspective, background, lighting, reflections and shadows unless the request explicitly asks to change one of them.
-- Change only what the user requested. Blend the edit naturally into the original scene with physically coherent scale, depth, contact shadows, reflections, texture and color grading.
-- If a reference image is supplied, match only the requested reference subject and keep the source scene dominant.
-- Keep realistic skin texture and natural photographic imperfections. Avoid plastic skin, distorted hands, duplicated objects, warped architecture and impossible geometry.
-- Do not add text, logos, watermarks, borders, UI, captions or a collage.
-- The result must look like a genuine iPhone photo, not an illustration or an obvious AI render.`;
+NON-NEGOTIABLE PRESERVATION
+- Change only the requested element. Keep every unrelated pixel and visual property as close to Image 1 as possible.
+- Preserve the person's exact identity, skin tone, hand and finger count, wrist thickness, joints, body proportions, pose and silhouette. Never enlarge, bend, rebuild or deform anatomy to make the inserted object fit; resize and orient the object instead.
+- Preserve the exact camera position, crop, 9:16 framing, perspective, lens look, background, architecture, lighting direction, exposure, white balance, shadows and reflections of Image 1.
+
+PHYSICAL COMPOSITING
+- Determine the real 3D placement surface before inserting the requested subject. Match its scale, rotation, perspective, depth, focal sharpness, grain, color temperature and lens distortion to Image 1.
+- The inserted subject must have believable contact, occlusion and cast/contact shadows. It must never float, intersect the body, melt into skin, duplicate, stretch, bend unnaturally or appear pasted on.
+- If the inserted subject is worn on the body (watch, bracelet, ring, necklace, glasses, clothing or shoes), fit it to the existing anatomy without altering that anatomy. Parts on the near side stay visible; parts continuing around the far side pass naturally behind the body.
+- For a watch or bracelet specifically: place the case centered on the natural top plane of the wrist; keep a realistic case diameter relative to wrist width; orient it with the arm; make the bracelet a single continuous closed band that wraps snugly around both sides of the wrist; hide the far section behind the wrist; preserve realistic gaps, links, clasp logic, metal reflections and a soft contact shadow. No open, broken, doubled, embedded or paper-flat strap.
+- Preserve the reference subject's exact design, proportions, materials, colors and details, while relighting it to belong in Image 1.
+- Product identity is invariant: reproduce every visible logo, brand inscription, symbol, dial marking, index, hand, number, date window, engraving and distinctive shape exactly as shown in Image 2. Do not invent, respell, approximate, replace, mirror, blur or remove brand details. Keep lettering crisp, correctly oriented and naturally printed or engraved on the physical surface.
+- For a watch face specifically: preserve the exact dial layout, logo placement and spelling, hand shapes, index count and positions, bezel screws, crown, date window, texture and metal finish from Image 2. Relight these details without redesigning them.
+
+FINAL QUALITY CHECK
+- The result must look like a genuine unedited iPhone photograph at first glance, with natural imperfections and no artificial beauty filtering.
+- Verify anatomy, object scale, attachment, occlusion, shadows, reflections and perspective before returning the final image.
+- No extra objects, text overlays, borders, UI, captions, watermarks or collage.`;
 }
 
 export async function POST(request: Request) {
