@@ -145,7 +145,10 @@ export async function POST(request: Request) {
     }
     openAIForm.append("prompt", generationPrompt(prompt, Boolean(referenceFile)));
     openAIForm.append("size", "1152x2048");
-    openAIForm.append("quality", "high");
+    // High output quality costs much more but does not improve how faithfully
+    // small logos or dial inscriptions are copied from a reference image.
+    // Keep generations economical while product-faithful compositing is built.
+    openAIForm.append("quality", "medium");
     openAIForm.append("output_format", "webp");
     openAIForm.append("output_compression", "100");
     openAIForm.append("n", "1");

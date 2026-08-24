@@ -28,30 +28,45 @@ async function loadImage(file: File) {
   }
 }
 
-async function prepareImage(file: File) {
+async function prepareImage(file: File, preserveReference = false) {
   if (!file.type.startsWith("image/")) throw new Error("Ce fichier n’est pas une image.");
+
+  // Never recompress a reference that already fits the upload limit. Fine
+  // product details (logos, dial markings, engravings) must reach the API with
+  // exactly the pixels supplied by the user.
+  if (
+    preserveReference
+    && ["image/jpeg", "image/png", "image/webp"].includes(file.type)
+    && file.size <= MAX_UPLOAD_BYTES
+  ) {
+    return file;
+  }
+
   const image = await loadImage(file);
-  const scale = Math.min(1, 2048 / Math.max(image.naturalWidth, image.naturalHeight));
+  const maxEdge = preserveReference ? 2560 : 2048;
+  const scale = Math.min(1, maxEdge / Math.max(image.naturalWidth, image.naturalHeight));
   const width = Math.max(1, Math.round(image.naturalWidth * scale));
   const height = Math.max(1, Math.round(image.naturalHeight * scale));
   const canvas = document.createElement("canvas");
   canvas.width = width;
   canvas.height = height;
-  const context = canvas.getContext("2d", { alpha: false });
+  const context = canvas.getContext("2d", { alpha: preserveReference });
   if (!context) throw new Error("Impossible de préparer cette image.");
   context.imageSmoothingEnabled = true;
   context.imageSmoothingQuality = "high";
   context.drawImage(image, 0, 0, width, height);
 
-  let quality = 0.94;
+  const outputType = preserveReference ? "image/webp" : "image/jpeg";
+  let quality = preserveReference ? 0.98 : 0.94;
   let blob: Blob | null = null;
   do {
-    blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", quality));
-    quality -= 0.05;
-  } while (blob && blob.size > MAX_UPLOAD_BYTES && quality >= 0.7);
+    blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, outputType, quality));
+    quality -= preserveReference ? 0.03 : 0.05;
+  } while (blob && blob.size > MAX_UPLOAD_BYTES && quality >= (preserveReference ? 0.79 : 0.7));
   if (!blob || blob.size > MAX_UPLOAD_BYTES) throw new Error("Cette photo est trop lourde. Choisis une autre photo.");
 
-  return new File([blob], `${file.name.replace(/\.[^.]+$/, "") || "photo"}.jpg`, { type: "image/jpeg" });
+  const extension = preserveReference ? "webp" : "jpg";
+  return new File([blob], `${file.name.replace(/\.[^.]+$/, "") || "photo"}.${extension}`, { type: outputType });
 }
 
 function UploadCard({ title, subtitle, file, onChange, optional = false }: {
@@ -105,7 +120,7 @@ export default function GeneratorClient({ initialCredits, initialGenerations }: 
     setMessage("Préparation de tes photos…");
     try {
       const preparedSource = await prepareImage(source);
-      const preparedReference = reference ? await prepareImage(reference) : null;
+      const preparedReference = reference ? await prepareImage(reference, true) : null;
       const form = new FormData();
       form.append("source", preparedSource);
       if (preparedReference) form.append("reference", preparedReference);
