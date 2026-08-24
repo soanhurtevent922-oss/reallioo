@@ -20,33 +20,33 @@ function isImageFile(value: FormDataEntryValue | null): value is File {
 }
 
 function generationPrompt(userPrompt: string, hasReference: boolean) {
+  const inputs = hasReference
+    ? `- Image 1 is the product/reference image. Its product identity is authoritative: preserve its exact logo, lettering, symbols, materials, colors, proportions and design. Use only the requested subject from this image; never copy its background or studio presentation.
+- Image 2 is the authoritative source photograph. Its person, anatomy, pose, camera, framing, lighting and environment must remain unchanged.`
+    : "- Image 1 is the authoritative source photograph. Its person, anatomy, pose, camera, framing, lighting and environment must remain unchanged.";
+
   return `ROLE
 You are performing a precise photorealistic edit, not creating a new scene.
 
 INPUTS
-- Image 1 is the authoritative source photograph. Its person, anatomy, pose, camera, framing and environment must remain unchanged.
-${
-    hasReference
-      ? "- Image 2 is the reference subject. Reproduce only the requested object/person/vehicle/clothing from it. Never copy Image 2's background, framing, lighting or studio presentation."
-      : "- No separate reference image is supplied."
-  }
+${inputs}
 
 USER EDIT
 ${userPrompt}
 
 NON-NEGOTIABLE PRESERVATION
-- Change only the requested element. Keep every unrelated pixel and visual property as close to Image 1 as possible.
+- Change only the requested element. Keep every unrelated pixel and visual property as close to the source photograph as possible.
 - Preserve the person's exact identity, skin tone, hand and finger count, wrist thickness, joints, body proportions, pose and silhouette. Never enlarge, bend, rebuild or deform anatomy to make the inserted object fit; resize and orient the object instead.
-- Preserve the exact camera position, crop, 9:16 framing, perspective, lens look, background, architecture, lighting direction, exposure, white balance, shadows and reflections of Image 1.
+- Preserve the exact camera position, crop, 9:16 framing, perspective, lens look, background, architecture, lighting direction, exposure, white balance, shadows and reflections of the source photograph.
 
 PHYSICAL COMPOSITING
-- Determine the real 3D placement surface before inserting the requested subject. Match its scale, rotation, perspective, depth, focal sharpness, grain, color temperature and lens distortion to Image 1.
+- Determine the real 3D placement surface before inserting the requested subject. Match its scale, rotation, perspective, depth, focal sharpness, grain, color temperature and lens distortion to the source photograph.
 - The inserted subject must have believable contact, occlusion and cast/contact shadows. It must never float, intersect the body, melt into skin, duplicate, stretch, bend unnaturally or appear pasted on.
 - If the inserted subject is worn on the body (watch, bracelet, ring, necklace, glasses, clothing or shoes), fit it to the existing anatomy without altering that anatomy. Parts on the near side stay visible; parts continuing around the far side pass naturally behind the body.
 - For a watch or bracelet specifically: place the case centered on the natural top plane of the wrist; keep a realistic case diameter relative to wrist width; orient it with the arm; make the bracelet a single continuous closed band that wraps snugly around both sides of the wrist; hide the far section behind the wrist; preserve realistic gaps, links, clasp logic, metal reflections and a soft contact shadow. No open, broken, doubled, embedded or paper-flat strap.
-- Preserve the reference subject's exact design, proportions, materials, colors and details, while relighting it to belong in Image 1.
-- Product identity is invariant: reproduce every visible logo, brand inscription, symbol, dial marking, index, hand, number, date window, engraving and distinctive shape exactly as shown in Image 2. Do not invent, respell, approximate, replace, mirror, blur or remove brand details. Keep lettering crisp, correctly oriented and naturally printed or engraved on the physical surface.
-- For a watch face specifically: preserve the exact dial layout, logo placement and spelling, hand shapes, index count and positions, bezel screws, crown, date window, texture and metal finish from Image 2. Relight these details without redesigning them.
+- Preserve the reference subject's exact design, proportions, materials, colors and details, while relighting it to belong in the source photograph.
+- Product identity is invariant: copy every visible logo, brand inscription, symbol, dial marking, index, hand, number, date window, engraving and distinctive shape exactly from the reference image. Treat the logo area as locked artwork: do not redraw, reinterpret, invent, respell, approximate, replace, mirror, blur, stylize or remove it. Keep lettering crisp, correctly oriented and naturally printed or engraved on the physical surface.
+- For a watch face specifically: preserve the exact dial layout, logo artwork, logo placement and spelling, hand shapes, index count and positions, bezel screws, crown, date window, texture and metal finish from the reference image. Relight these details without redesigning them.
 
 FINAL QUALITY CHECK
 - The result must look like a genuine unedited iPhone photograph at first glance, with natural imperfections and no artificial beauty filtering.
@@ -139,12 +139,18 @@ export async function POST(request: Request) {
 
     const openAIForm = new FormData();
     openAIForm.append("model", "gpt-image-2");
-    openAIForm.append("image[]", source, `source.${extensionFor(source.type)}`);
+    // With several high-fidelity inputs, the first image receives the richest
+    // preservation. Put the product reference first so logos and dial artwork
+    // stay as close as possible to the supplied product photo.
     if (referenceFile) {
       openAIForm.append("image[]", referenceFile, `reference.${extensionFor(referenceFile.type)}`);
+      openAIForm.append("image[]", source, `source.${extensionFor(source.type)}`);
+    } else {
+      openAIForm.append("image[]", source, `source.${extensionFor(source.type)}`);
     }
     openAIForm.append("prompt", generationPrompt(prompt, Boolean(referenceFile)));
     openAIForm.append("size", "1152x2048");
+    openAIForm.append("input_fidelity", "high");
     // High output quality costs much more but does not improve how faithfully
     // small logos or dial inscriptions are copied from a reference image.
     // Keep generations economical while product-faithful compositing is built.

@@ -164,7 +164,7 @@ export default function GeneratorClient({ initialCredits, initialGenerations }: 
 
       {result ? (
         <section className="generation-result">
-          <div><p>DERNIÈRE CRÉATION</p><h2>Ton image est prête.</h2><span>1152 × 2048 · WebP · optimisée pour iPhone, TikTok, Reels et Stories</span><a className="yellow-pill" href={result.resultUrl} download={`reallioo-${result.id}.webp`}>Télécharger l’image ↓</a></div>
+          <div><p>DERNIÈRE CRÉATION</p><h2>Ton image est prête.</h2><span>1152 × 2048 · WebP · optimisée pour iPhone, TikTok, Reels et Stories</span><a className="yellow-pill" href={`/api/generations/${result.id}/download`}>Télécharger l’image ↓</a></div>
           <img src={result.resultUrl} alt={result.prompt} />
         </section>
       ) : null}
@@ -172,7 +172,7 @@ export default function GeneratorClient({ initialCredits, initialGenerations }: 
       <section className="generation-history" id="history">
         <div className="history-heading"><div><p>TES CRÉATIONS</p><h2>{generations.length ? "Ton studio personnel." : "Tes prochaines images apparaîtront ici."}</h2></div><span>{credits === null ? "ACCÈS ILLIMITÉ" : `${credits} CRÉDIT${credits > 1 ? "S" : ""} RESTANT${credits > 1 ? "S" : ""}`}</span></div>
         {generations.length ? (
-          <div className="history-grid">{generations.map((generation) => <article key={generation.id}><button type="button" onClick={() => setResult(generation)}><img src={generation.resultUrl} alt={generation.prompt} /></button><div><p>{generation.prompt}</p><a href={generation.resultUrl} download={`reallioo-${generation.id}.webp`}>Télécharger ↓</a></div></article>)}</div>
+          <div className="history-grid">{generations.map((generation) => <article key={generation.id}><button type="button" onClick={() => setResult(generation)}><img src={generation.resultUrl} alt={generation.prompt} /></button><div><p>{generation.prompt}</p><a href={`/api/generations/${generation.id}/download`}>Télécharger ↓</a></div></article>)}</div>
         ) : <span>Ta première génération terminée sera conservée ici.</span>}
       </section>
     </>
