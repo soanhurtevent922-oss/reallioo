@@ -11,9 +11,9 @@ const prompts = [
 ];
 
 const plans = [
-  { name: "DÉCOUVERTE", price: "9,99 €", credits: "10 créations / semaine", details: ["Résultats HD", "1 image de référence", "Tous les univers"] },
-  { name: "CRÉATEUR", price: "19,99 €", credits: "40 créations / semaine", details: ["Tout Découverte", "Génération prioritaire", "Variantes illimitées"], featured: true },
-  { name: "ULTRA", price: "39,99 €", credits: "120 créations / semaine", details: ["Tout Créateur", "Exports 4K", "Créations par lot"] },
+  { key: "starter", name: "STARTER", price: "9,99 €", cadence: "/mois", credits: "40 créations / mois", details: ["Résultats HD", "1 image de référence", "Tous les univers"] },
+  { key: "creator", name: "CRÉATEUR", price: "19,99 €", cadence: "/mois", credits: "120 créations / mois", details: ["Tout Starter", "Génération prioritaire", "Plus de créations"], featured: true },
+  { key: "lifetime", name: "ACCÈS À VIE", price: "99,99 €", cadence: "une fois", credits: "200 créations incluses", details: ["Paiement unique", "Accès permanent", "Aucun abonnement"] },
 ];
 
 const faq = [
@@ -145,13 +145,13 @@ export default function Home() {
       </section>
 
       <section className="pricing-section" id="prices">
-        <header className="center-heading"><p>CHOISIS TON NIVEAU</p><h2>PLUS D’IDÉES.<br /><em>PLUS DE CRÉATIONS.</em></h2><span>Sans engagement. Tes crédits reviennent chaque semaine.</span></header>
+        <header className="center-heading"><p>CHOISIS TON NIVEAU</p><h2>PLUS D’IDÉES.<br /><em>PLUS DE CRÉATIONS.</em></h2><span>Les abonnements sont sans engagement. L’accès à vie est payé une seule fois.</span></header>
         <div className="plan-grid">
           {plans.map((plan) => <article className={plan.featured ? "plan featured" : "plan"} key={plan.name}>
             {plan.featured && <div className="popular">LE PLUS CHOISI</div>}
-            <p>{plan.name}</p><h3>{plan.price}<small>/mois</small></h3><strong>{plan.credits}</strong>
+            <p>{plan.name}</p><h3>{plan.price}<small>{plan.cadence}</small></h3><strong>{plan.credits}</strong>
             <ul>{plan.details.map((detail) => <li key={detail}>✓ {detail}</li>)}</ul>
-            <a className={plan.featured ? "yellow-pill" : "outline-pill"} href="/register">Commencer <span>→</span></a>
+            <a className={plan.featured ? "yellow-pill" : "outline-pill"} href={`/checkout/${plan.key}`}>Commencer <span>→</span></a>
           </article>)}
         </div>
       </section>

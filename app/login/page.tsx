@@ -23,7 +23,9 @@ export default function LoginPage() {
       setMessage("Adresse e-mail ou mot de passe incorrect.");
       return;
     }
-    router.push("/dashboard");
+    const requested = new URLSearchParams(window.location.search).get("next");
+    const next = requested?.startsWith("/") && !requested.startsWith("//") ? requested : "/dashboard";
+    router.push(next);
     router.refresh();
   }
 
@@ -37,7 +39,7 @@ export default function LoginPage() {
         <label>Mot de passe<input type="password" required minLength={6} value={password} onChange={(event) => setPassword(event.target.value)} placeholder="••••••••" /></label>
         {message && <div className="auth-message" role="alert">{message}</div>}
         <button className="yellow-pill" disabled={loading}>{loading ? "Connexion…" : "Se connecter →"}</button>
-        <span>Pas encore de compte ? <Link href="/register">Créer mon compte</Link></span>
+        <span>Pas encore de compte ? <Link href={`/register${typeof window !== "undefined" ? window.location.search : ""}`}>Créer mon compte</Link></span>
       </form>
     </main>
   );

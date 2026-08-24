@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { FormEvent, useState } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 export default function RegisterPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
@@ -15,13 +17,17 @@ export default function RegisterPage() {
     setLoading(true);
     setMessage("");
     const supabase = createClient();
-    const { error } = await supabase.auth.signUp({
+    const requested = new URLSearchParams(window.location.search).get("next");
+    const next = requested?.startsWith("/") && !requested.startsWith("//") ? requested : "/dashboard";
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+      options: { emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}` },
     });
     setLoading(false);
-    setMessage(error ? error.message : "Compte créé ! Vérifie maintenant ta boîte e-mail.");
+    if (error) setMessage(error.message);
+    else if (data.session) router.push(next);
+    else setMessage("Compte créé ! Vérifie maintenant ta boîte e-mail.");
   }
 
   return (
@@ -34,7 +40,7 @@ export default function RegisterPage() {
         <label>Mot de passe<input type="password" required minLength={6} value={password} onChange={(event) => setPassword(event.target.value)} placeholder="6 caractères minimum" /></label>
         {message && <div className="auth-message" role="status">{message}</div>}
         <button className="yellow-pill" disabled={loading}>{loading ? "Création…" : "Créer mon compte →"}</button>
-        <span>Déjà inscrit ? <Link href="/login">Se connecter</Link></span>
+        <span>Déjà inscrit ? <Link href={`/login${typeof window !== "undefined" ? window.location.search : ""}`}>Se connecter</Link></span>
       </form>
     </main>
   );

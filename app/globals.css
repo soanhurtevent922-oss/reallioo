@@ -216,6 +216,18 @@ footer small { grid-column:1/-1; padding-top:25px; border-top:1px solid #202020;
 .auth-card>span a { color:var(--yellow); font-weight:850; }
 .auth-message { padding:13px 15px; border:1px solid #5a4c00; border-radius:14px; background:#201d08; color:#ffe76f; font-size:13px; line-height:1.4; }
 
+.checkout-page { min-height:100vh; padding:110px 24px 60px; display:grid; place-items:center; background:radial-gradient(circle at 10% 10%,#473b00 0,transparent 34%),radial-gradient(circle at 88% 84%,#2b1d00 0,transparent 35%),#070707; }
+.checkout-card { width:min(620px,100%); padding:42px; border:1px solid #303030; border-radius:36px; background:rgba(16,16,16,.96); box-shadow:0 30px 90px rgba(0,0,0,.55); }
+.checkout-card>p,.dashboard-plan p { margin:0; color:var(--yellow); font-size:11px; font-weight:950; letter-spacing:.15em; }
+.checkout-card h1 { margin:18px 0 30px; font-size:58px; line-height:.9; letter-spacing:-.065em; }
+.checkout-summary { display:flex; align-items:end; justify-content:space-between; gap:20px; padding:25px 0; border-block:1px solid #303030; }
+.checkout-summary span { color:#bbb; font-weight:800; }
+.checkout-summary strong { font-size:34px; white-space:nowrap; }
+.checkout-summary small { display:block; color:#888; font-size:12px; text-align:right; }
+.checkout-card ul { list-style:none; padding:15px 0; color:#aaa; line-height:2; }
+.checkout-card form button { width:100%; border:0; }
+.checkout-back { display:block; margin-top:20px; color:#888; text-align:center; font-size:13px; }
+
 .dashboard-page { min-height:100vh; display:grid; grid-template-columns:250px 1fr; background:#f4f4ee; color:#0a0a0a; }
 .dashboard-sidebar { min-height:100vh; position:sticky; top:0; display:flex; flex-direction:column; padding:34px 24px; background:#090909; color:#fff; }
 .dashboard-sidebar nav { display:grid; gap:8px; margin-top:70px; }
@@ -239,6 +251,10 @@ footer small { grid-column:1/-1; padding-top:25px; border-top:1px solid #202020;
 .dashboard-empty { margin-top:18px; padding:35px; border:1px solid #dddcd2; border-radius:28px; background:#fff; }
 .dashboard-empty h2 { margin:0 0 9px; font-size:28px; }
 .dashboard-empty span { color:#888; }
+.dashboard-plan { margin-top:18px; display:flex; align-items:center; justify-content:space-between; gap:25px; padding:30px 35px; border:1px solid #dddcd2; border-radius:28px; background:#fff; }
+.dashboard-plan h2 { margin:10px 0 7px; font-size:30px; }
+.dashboard-plan span { color:#888; }
+.dashboard-plan .outline-pill { color:#111; border-color:#bbb; }
 
 @media (max-width:800px) {
   .auth-logo { top:20px; left:22px; }
@@ -253,4 +269,5 @@ footer small { grid-column:1/-1; padding-top:25px; border-top:1px solid #202020;
   .dashboard-content>header h1 { font-size:42px; }
   .dashboard-generator { grid-template-columns:1fr; }
   .dashboard-upload { min-height:300px; }
+  .dashboard-plan { align-items:flex-start; flex-direction:column; }
 }

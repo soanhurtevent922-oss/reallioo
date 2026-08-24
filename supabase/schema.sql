@@ -4,6 +4,7 @@ create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   email text,
   plan text not null default 'free',
+  is_admin boolean not null default false,
   credits_remaining integer not null default 0 check (credits_remaining >= 0),
   credits_reset_at timestamptz,
   created_at timestamptz not null default now(),
@@ -26,6 +27,7 @@ create table if not exists public.subscriptions (
   user_id uuid primary key references auth.users(id) on delete cascade,
   stripe_customer_id text unique,
   stripe_subscription_id text unique,
+  stripe_price_id text,
   plan text not null default 'free',
   status text not null default 'inactive',
   current_period_end timestamptz,
@@ -36,10 +38,17 @@ alter table public.profiles enable row level security;
 alter table public.generations enable row level security;
 alter table public.subscriptions enable row level security;
 
+create table if not exists public.stripe_events (
+  event_id text primary key,
+  created_at timestamptz not null default now(),
+  processed_at timestamptz
+);
+
+alter table public.stripe_events enable row level security;
+
 create policy "Users read own profile" on public.profiles
   for select using (auth.uid() = id);
-create policy "Users update own profile" on public.profiles
-  for update using (auth.uid() = id) with check (auth.uid() = id);
+drop policy if exists "Users update own profile" on public.profiles;
 
 create policy "Users read own generations" on public.generations
   for select using (auth.uid() = user_id);
