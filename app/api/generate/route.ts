@@ -32,7 +32,7 @@ function isImageFile(value: FormDataEntryValue | null): value is File {
 
 function generationPrompt(userPrompt: string, hasReference: boolean) {
   const inputs = hasReference
-    ? `- Image 1 is the product/reference image. Its product identity is authoritative: preserve its exact logo, lettering, symbols, materials, colors, proportions and design. Use only the requested subject from this image; never copy its background or studio presentation.
+    ? `- Image 1 is the reference subject to insert or use for the requested edit. It can be a person, an animal, a product, a vehicle or another object. Preserve the identity and appearance of that subject. Use only the requested subject from this image; never copy its background or studio presentation.
 - Image 2 is the authoritative source photograph. Its person, anatomy, pose, camera, framing, lighting and environment must remain unchanged.`
     : "- Image 1 is the authoritative source photograph. Its person, anatomy, pose, camera, framing, lighting and environment must remain unchanged.";
 
@@ -55,14 +55,91 @@ PHYSICAL COMPOSITING
 - The inserted subject must have believable contact, occlusion and cast/contact shadows. It must never float, intersect the body, melt into skin, duplicate, stretch, bend unnaturally or appear pasted on.
 - If the inserted subject is worn on the body (watch, bracelet, ring, necklace, glasses, clothing or shoes), fit it to the existing anatomy without altering that anatomy. Parts on the near side stay visible; parts continuing around the far side pass naturally behind the body.
 - For a watch or bracelet specifically: place the case centered on the natural top plane of the wrist; keep a realistic case diameter relative to wrist width; orient it with the arm; make the bracelet a single continuous closed band that wraps snugly around both sides of the wrist; hide the far section behind the wrist; preserve realistic gaps, links, clasp logic, metal reflections and a soft contact shadow. No open, broken, doubled, embedded or paper-flat strap.
-- Preserve the reference subject's exact design, proportions, materials, colors and details, while relighting it to belong in the source photograph.
-- Product identity is invariant: copy every visible logo, brand inscription, symbol, dial marking, index, hand, number, date window, engraving and distinctive shape exactly from the reference image. Treat the logo area as locked artwork: do not redraw, reinterpret, invent, respell, approximate, replace, mirror, blur, stylize or remove it. Keep lettering crisp, correctly oriented and naturally printed or engraved on the physical surface.
+- If the reference subject is a person: preserve that adult person's recognizable face, hairstyle, skin tone, clothing, body proportions and distinguishing appearance. Place the person naturally into the source scene at a realistic scale. Do not copy the reference background and do not alter the source environment beyond the requested insertion.
+- If the reference subject is a product, vehicle or object: preserve its exact design, proportions, materials, colors and details while relighting it to belong in the source photograph.
+- Apply logo and brand-preservation rules only when the requested reference subject is physical merchandise, equipment, a vehicle, clothing, an accessory or another branded object. Never apply product/logo rules to a person, animal, skin, face, hair, sky, landscape or background.
+- For branded physical objects only, product identity is invariant: copy every visible logo, brand inscription, symbol, dial marking, number, engraving and distinctive shape exactly from the reference image. Treat the logo area as locked artwork: do not redraw, reinterpret, invent, respell, approximate, replace, mirror, blur, stylize or remove it. Keep lettering crisp, correctly oriented and naturally printed or engraved on the physical surface.
 - For a watch face specifically: preserve the exact dial layout, logo artwork, logo placement and spelling, hand shapes, index count and positions, bezel screws, crown, date window, texture and metal finish from the reference image. Relight these details without redesigning them.
 
 FINAL QUALITY CHECK
 - The result must look like a genuine unedited iPhone photograph at first glance, with natural imperfections and no artificial beauty filtering.
 - Verify anatomy, object scale, attachment, occlusion, shadows, reflections and perspective before returning the final image.
 - No extra objects, text overlays, borders, UI, captions, watermarks or collage.`;
+}
+
+function classifyOpenAIError(
+  status: number,
+  error?: { message?: string; code?: string },
+) {
+  const details = `${error?.code || ""} ${error?.message || ""}`.toLowerCase();
+
+  if (
+    details.includes("content_policy") ||
+    details.includes("moderation") ||
+    details.includes("safety") ||
+    details.includes("sexual")
+  ) {
+    return new ImageGenerationError(
+      "Une des photos ou la demande a été bloquée par le filtre de sécurité. Essaie une référence moins suggestive ou une personne davantage vêtue. Ton crédit Reallioo a été rendu.",
+      422,
+      "AI_SAFETY_REJECTED",
+    );
+  }
+
+  if (
+    details.includes("invalid_image") ||
+    details.includes("unsupported_image") ||
+    details.includes("image_format") ||
+    details.includes("invalid_file")
+  ) {
+    return new ImageGenerationError(
+      "Une des images n’a pas pu être lue par le moteur IA. Enregistre-la en JPG, PNG ou WEBP puis réessaie. Ton crédit Reallioo a été rendu.",
+      422,
+      "AI_INVALID_IMAGE",
+    );
+  }
+
+  if (
+    details.includes("insufficient_quota") ||
+    details.includes("billing") ||
+    details.includes("hard_limit")
+  ) {
+    return new ImageGenerationError(
+      "Le budget OpenAI de Reallioo est épuisé. Aucun nouveau test ne doit être lancé avant sa recharge. Ton crédit Reallioo a été rendu.",
+      503,
+      "AI_BILLING_LIMIT",
+    );
+  }
+
+  if (details.includes("organization") && details.includes("verif")) {
+    return new ImageGenerationError(
+      "Le compte OpenAI de Reallioo doit encore être vérifié pour utiliser ce modèle. Ton crédit Reallioo a été rendu.",
+      503,
+      "AI_ORGANIZATION_VERIFICATION",
+    );
+  }
+
+  if (status === 429) {
+    return new ImageGenerationError(
+      "Le moteur IA reçoit trop de demandes. Ton crédit Reallioo a été rendu : attends une minute puis réessaie.",
+      429,
+      "AI_RATE_LIMIT",
+    );
+  }
+
+  if (status >= 500) {
+    return new ImageGenerationError(
+      "Le moteur IA est momentanément indisponible. Ton crédit Reallioo a été rendu : réessaie dans quelques instants.",
+      503,
+      "AI_UNAVAILABLE",
+    );
+  }
+
+  return new ImageGenerationError(
+    "La demande a été refusée par le moteur IA. Ne relance pas plusieurs fois : vérifie les photos ou consulte les logs Vercel. Ton crédit Reallioo a été rendu.",
+    422,
+    "AI_REQUEST_REJECTED",
+  );
 }
 
 export async function POST(request: Request) {
@@ -169,6 +246,10 @@ export async function POST(request: Request) {
     // small logos or dial inscriptions are copied from a reference image.
     // Keep generations economical while product-faithful compositing is built.
     openAIForm.append("quality", "medium");
+    // The official Images API supports a less restrictive moderation mode for
+    // legitimate, non-explicit edits such as swimwear or beach photography.
+    // Safety filtering remains enabled.
+    openAIForm.append("moderation", "low");
     openAIForm.append("output_format", "webp");
     openAIForm.append("output_compression", "100");
     openAIForm.append("n", "1");
@@ -197,25 +278,7 @@ export async function POST(request: Request) {
         message: openAIResult.error?.message,
       });
 
-      if (openAIResponse.status === 429) {
-        throw new ImageGenerationError(
-          "Le moteur IA reçoit trop de demandes. Ton crédit a été rendu : attends une minute puis réessaie.",
-          429,
-          "AI_RATE_LIMIT",
-        );
-      }
-      if (openAIResponse.status >= 500) {
-        throw new ImageGenerationError(
-          "Le moteur IA est momentanément indisponible. Ton crédit a été rendu : réessaie dans quelques instants.",
-          503,
-          "AI_UNAVAILABLE",
-        );
-      }
-      throw new ImageGenerationError(
-        "La demande n’a pas pu être traitée par le moteur IA. Ton crédit a été rendu.",
-        422,
-        "AI_REQUEST_REJECTED",
-      );
+      throw classifyOpenAIError(openAIResponse.status, openAIResult.error);
     }
 
     const base64 = openAIResult?.data?.[0]?.b64_json;
