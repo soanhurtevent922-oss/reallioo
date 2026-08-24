@@ -9,6 +9,17 @@ const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 const MAX_FILE_SIZE = 2_200_000;
 const MAX_PROMPT_LENGTH = 1_500;
 
+class ImageGenerationError extends Error {
+  constructor(
+    message: string,
+    readonly status: number = 502,
+    readonly code: string = "IMAGE_GENERATION_FAILED",
+  ) {
+    super(message);
+    this.name = "ImageGenerationError";
+  }
+}
+
 function extensionFor(type: string) {
   if (type === "image/png") return "png";
   if (type === "image/webp") return "webp";
@@ -37,7 +48,7 @@ ${userPrompt}
 NON-NEGOTIABLE PRESERVATION
 - Change only the requested element. Keep every unrelated pixel and visual property as close to the source photograph as possible.
 - Preserve the person's exact identity, skin tone, hand and finger count, wrist thickness, joints, body proportions, pose and silhouette. Never enlarge, bend, rebuild or deform anatomy to make the inserted object fit; resize and orient the object instead.
-- Preserve the exact camera position, crop, 9:16 framing, perspective, lens look, background, architecture, lighting direction, exposure, white balance, shadows and reflections of the source photograph.
+- Preserve the exact camera position, portrait framing, perspective, lens look, background, architecture, lighting direction, exposure, white balance, shadows and reflections of the source photograph.
 
 PHYSICAL COMPOSITING
 - Determine the real 3D placement surface before inserting the requested subject. Match its scale, rotation, perspective, depth, focal sharpness, grain, color temperature and lens distortion to the source photograph.
@@ -149,8 +160,11 @@ export async function POST(request: Request) {
       openAIForm.append("image[]", source, `source.${extensionFor(source.type)}`);
     }
     openAIForm.append("prompt", generationPrompt(prompt, Boolean(referenceFile)));
-    openAIForm.append("size", "1152x2048");
-    openAIForm.append("input_fidelity", "high");
+    // 1024x1536 is the portrait size officially supported by the Images API.
+    // A reference product needs high input fidelity to preserve its identity,
+    // while a one-photo edit can use low fidelity and stay less expensive.
+    openAIForm.append("size", "1024x1536");
+    openAIForm.append("input_fidelity", referenceFile ? "high" : "low");
     // High output quality costs much more but does not improve how faithfully
     // small logos or dial inscriptions are copied from a reference image.
     // Keep generations economical while product-faithful compositing is built.
@@ -166,10 +180,42 @@ export async function POST(request: Request) {
       signal: AbortSignal.timeout(280_000),
     });
 
-    const openAIResult = await openAIResponse.json();
+    const requestId = openAIResponse.headers.get("x-request-id");
+    const responseText = await openAIResponse.text();
+    let openAIResult: { data?: Array<{ b64_json?: string }>; error?: { message?: string; code?: string } } = {};
+    try {
+      openAIResult = JSON.parse(responseText);
+    } catch {
+      // Some gateway failures return an empty or non-JSON response.
+    }
+
     if (!openAIResponse.ok) {
-      console.error("OpenAI image error", openAIResponse.status, openAIResult?.error?.message);
-      throw new Error("image_generation_failed");
+      console.error("OpenAI image error", {
+        status: openAIResponse.status,
+        requestId,
+        code: openAIResult.error?.code,
+        message: openAIResult.error?.message,
+      });
+
+      if (openAIResponse.status === 429) {
+        throw new ImageGenerationError(
+          "Le moteur IA reçoit trop de demandes. Ton crédit a été rendu : attends une minute puis réessaie.",
+          429,
+          "AI_RATE_LIMIT",
+        );
+      }
+      if (openAIResponse.status >= 500) {
+        throw new ImageGenerationError(
+          "Le moteur IA est momentanément indisponible. Ton crédit a été rendu : réessaie dans quelques instants.",
+          503,
+          "AI_UNAVAILABLE",
+        );
+      }
+      throw new ImageGenerationError(
+        "La demande n’a pas pu être traitée par le moteur IA. Ton crédit a été rendu.",
+        422,
+        "AI_REQUEST_REJECTED",
+      );
     }
 
     const base64 = openAIResult?.data?.[0]?.b64_json;
@@ -205,9 +251,10 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error("Generation failed", error);
+    const generationError = error instanceof ImageGenerationError ? error : null;
     await admin
       .from("generations")
-      .update({ status: "failed", error_message: "generation_failed" })
+      .update({ status: "failed", error_message: generationError?.code || "generation_failed" })
       .eq("id", generationId)
       .eq("user_id", user.id);
 
@@ -216,8 +263,13 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json(
-      { error: "La génération n’a pas abouti. Ton crédit a été rendu, réessaie." },
-      { status: 500 },
+      {
+        error:
+          generationError?.message ||
+          "La génération n’a pas abouti. Ton crédit a été rendu, réessaie.",
+        code: generationError?.code || "GENERATION_FAILED",
+      },
+      { status: generationError?.status || 500 },
     );
   }
 }

@@ -126,7 +126,7 @@ export default function GeneratorClient({ initialCredits, initialGenerations }: 
       if (preparedReference) form.append("reference", preparedReference);
       form.append("prompt", prompt.trim());
 
-      setMessage("L’IA construit ton image réaliste en 9:16. Cela peut prendre jusqu’à deux minutes…");
+      setMessage("L’IA construit ton image réaliste en format vertical mobile. Cela peut prendre jusqu’à deux minutes…");
       const response = await fetch("/api/generate", { method: "POST", body: form });
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error || "La génération a échoué.");
@@ -135,7 +135,7 @@ export default function GeneratorClient({ initialCredits, initialGenerations }: 
       setResult(generated);
       setGenerations((current) => [generated, ...current.filter((item) => item.id !== generated.id)]);
       if (payload.creditsRemaining !== null) setCredits(Number(payload.creditsRemaining));
-      setMessage("Ta photo est prête. Tu peux la télécharger en qualité 9:16.");
+      setMessage("Ta photo est prête. Tu peux la télécharger en qualité mobile.");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "La génération a échoué. Réessaie.");
     } finally {
@@ -152,7 +152,7 @@ export default function GeneratorClient({ initialCredits, initialGenerations }: 
         </div>
 
         <div className="dashboard-prompt">
-          <div className="prompt-heading"><p>CE QUE TU VEUX MODIFIER</p><span>FORMAT IPHONE · 9:16</span></div>
+          <div className="prompt-heading"><p>CE QUE TU VEUX MODIFIER</p><span>FORMAT MOBILE · PORTRAIT</span></div>
           <textarea value={prompt} maxLength={1500} onChange={(event) => setPrompt(event.target.value)} placeholder="Exemple : remplace la voiture blanche par exactement la Porsche de la photo de référence. Garde le décor, l’angle, la porte ouverte et la lumière identiques." />
           <div className="prompt-footer">
             <small>{prompt.length}/1500</small>
@@ -164,7 +164,7 @@ export default function GeneratorClient({ initialCredits, initialGenerations }: 
 
       {result ? (
         <section className="generation-result">
-          <div><p>DERNIÈRE CRÉATION</p><h2>Ton image est prête.</h2><span>1152 × 2048 · WebP · optimisée pour iPhone, TikTok, Reels et Stories</span><a className="yellow-pill" href={`/api/generations/${result.id}/download`}>Télécharger l’image ↓</a></div>
+          <div><p>DERNIÈRE CRÉATION</p><h2>Ton image est prête.</h2><span>1024 × 1536 · WebP · optimisée pour mobile et réseaux sociaux</span><a className="yellow-pill" href={`/api/generations/${result.id}/download`}>Télécharger l’image ↓</a></div>
           <img src={result.resultUrl} alt={result.prompt} />
         </section>
       ) : null}
