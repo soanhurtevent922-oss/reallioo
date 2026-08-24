@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { signOut } from "./actions";
+import GeneratorClient, { type GenerationCard } from "./generator-client";
 
 export const dynamic = "force-dynamic";
 
@@ -8,26 +10,60 @@ export default async function DashboardPage() {
   const supabase = await createClient();
   const { data } = await supabase.auth.getClaims();
   if (!data?.claims) redirect("/login");
+
   const userId = String(data.claims.sub);
-  const { data: profile } = await supabase.from("profiles").select("plan, credits_remaining, is_admin").eq("id", userId).maybeSingle();
+  const [{ data: profile }, { data: generations }] = await Promise.all([
+    supabase.from("profiles").select("plan, credits_remaining, is_admin").eq("id", userId).maybeSingle(),
+    supabase
+      .from("generations")
+      .select("id, prompt, result_path, created_at")
+      .eq("user_id", userId)
+      .eq("status", "completed")
+      .not("result_path", "is", null)
+      .order("created_at", { ascending: false })
+      .limit(12),
+  ]);
+
+  const admin = createAdminClient();
+  const initialGenerations: GenerationCard[] = [];
+  for (const generation of generations || []) {
+    if (!generation.result_path) continue;
+    const { data: signed } = await admin.storage.from("generations").createSignedUrl(generation.result_path, 3600);
+    if (!signed?.signedUrl) continue;
+    initialGenerations.push({
+      id: generation.id,
+      prompt: generation.prompt,
+      resultUrl: signed.signedUrl,
+      createdAt: generation.created_at,
+    });
+  }
+
   const planName = profile?.is_admin ? "ADMIN" : (profile?.plan || "free").toUpperCase();
-  const credits = profile?.is_admin ? "ILLIMITÉS" : String(profile?.credits_remaining ?? 0);
+  const credits = profile?.is_admin ? null : Number(profile?.credits_remaining ?? 0);
 
   return (
     <main className="dashboard-page">
       <aside className="dashboard-sidebar">
         <a className="logo" href="/">REALLI<span>OO</span></a>
-        <nav><a className="active" href="/dashboard">✦ Créer</a><a href="#history">Mes créations</a><a href="#plan">Mon abonnement</a></nav>
+        <nav>
+          <a className="active" href="/dashboard">✦ Créer</a>
+          <a href="#history">Mes créations</a>
+          <a href="#plan">Mon abonnement</a>
+        </nav>
         <form action={signOut}><button type="submit">Se déconnecter</button></form>
       </aside>
       <section className="dashboard-content">
-        <header><div><p>STUDIO PERSONNEL · {planName}</p><h1>Crée l’impossible.</h1></div><span>{credits} CRÉDITS</span></header>
-        <div className="dashboard-generator">
-          <div className="dashboard-upload"><strong>＋</strong><h2>Ajoute ta photo</h2><p>JPG, PNG ou WEBP</p></div>
-          <div className="dashboard-prompt"><p>CE QUE TU VEUX MODIFIER</p><textarea placeholder="Exemple : remplace la voiture par une Porsche noire et conserve exactement le même décor…" /><button className="yellow-pill">Générer ma photo →</button></div>
+        <header>
+          <div><p>STUDIO PERSONNEL · {planName}</p><h1>Crée l’impossible.</h1></div>
+          <span>{credits === null ? "CRÉDITS ILLIMITÉS" : `${credits} CRÉDIT${credits > 1 ? "S" : ""}`}</span>
+        </header>
+
+        <GeneratorClient initialCredits={credits} initialGenerations={initialGenerations} />
+
+        <div className="dashboard-plan" id="plan">
+          <div><p>TON ACCÈS</p><h2>{planName}</h2><span>{profile?.is_admin ? "Accès propriétaire illimité" : `${credits ?? 0} crédits disponibles`}</span></div>
+          {profile?.plan && profile.plan !== "free" && profile.plan !== "lifetime" ? <form action="/api/stripe/portal" method="post"><button className="outline-pill" type="submit">Gérer mon abonnement →</button></form> : <a className="yellow-pill" href="/#prices">Voir les offres →</a>}
         </div>
-        <div className="dashboard-empty" id="history"><p>TES CRÉATIONS</p><h2>Tes prochaines images apparaîtront ici.</h2><span>Chaque génération terminée apparaîtra automatiquement dans cet espace.</span></div>
-        <div className="dashboard-plan" id="plan"><div><p>TON ACCÈS</p><h2>{planName}</h2><span>{profile?.is_admin ? "Accès propriétaire illimité" : `${credits} crédits disponibles`}</span></div>{profile?.plan && profile.plan !== "free" && profile.plan !== "lifetime" ? <form action="/api/stripe/portal" method="post"><button className="outline-pill" type="submit">Gérer mon abonnement →</button></form> : <a className="yellow-pill" href="/#prices">Voir les offres →</a>}</div>
       </section>
     </main>
   );

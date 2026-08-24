@@ -6,7 +6,8 @@ SaaS B2C de création et de transformation d'images par IA.
 
 - Next.js 16
 - Supabase (comptes, base de données et stockage)
-- Stripe (abonnements et crédits, prochaine étape)
+- Stripe (abonnements et crédits)
+- OpenAI GPT Image (retouche photoréaliste)
 - Vercel (hébergement)
 
 ## Variables à configurer
@@ -16,7 +17,13 @@ Copier `.env.example` vers `.env.local`, puis renseigner :
 ```env
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+OPENAI_API_KEY=
 ```
+
+Exécuter aussi `supabase/ai-generation.sql` une fois dans le SQL Editor Supabase.
+
+Le moteur produit des images WebP en `1152 × 2048` (9:16), qualité `medium`, à partir d’une photo principale et d’une référence facultative.
 
 ## Développement
 
