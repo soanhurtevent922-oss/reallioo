@@ -119,6 +119,17 @@ function classifyOpenAIError(
     );
   }
 
+  if (
+    details.includes("invalid_input_fidelity_model") ||
+    (details.includes("input_fidelity") && details.includes("does not support"))
+  ) {
+    return new ImageGenerationError(
+      "Le moteur IA a refusé un réglage technique incompatible. Ton crédit Reallioo a été rendu.",
+      503,
+      "AI_CONFIGURATION_ERROR",
+    );
+  }
+
   if (status === 429) {
     return new ImageGenerationError(
       "Le moteur IA reçoit trop de demandes. Ton crédit Reallioo a été rendu : attends une minute puis réessaie.",
@@ -238,10 +249,9 @@ export async function POST(request: Request) {
     }
     openAIForm.append("prompt", generationPrompt(prompt, Boolean(referenceFile)));
     // 1024x1536 is the portrait size officially supported by the Images API.
-    // A reference product needs high input fidelity to preserve its identity,
-    // while a one-photo edit can use low fidelity and stay less expensive.
+    // gpt-image-2 preserves input details automatically and rejects the
+    // input_fidelity parameter, so it must not be sent for this model.
     openAIForm.append("size", "1024x1536");
-    openAIForm.append("input_fidelity", referenceFile ? "high" : "low");
     // High output quality costs much more but does not improve how faithfully
     // small logos or dial inscriptions are copied from a reference image.
     // Keep generations economical while product-faithful compositing is built.
