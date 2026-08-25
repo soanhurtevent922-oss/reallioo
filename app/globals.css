@@ -280,6 +280,7 @@ footer small { grid-column:1/-1; padding-top:25px; border-top:1px solid #202020;
 .checkout-summary strong { font-size:34px; white-space:nowrap; }
 .checkout-summary small { display:block; color:#888; font-size:12px; text-align:right; }
 .checkout-promo { margin:14px 0 0; padding:12px 14px; border:1px solid #5d5000; border-radius:14px; background:#211d00; color:#ffe34f; font-size:11px; font-weight:950; letter-spacing:.07em; text-align:center; }
+.checkout-error { margin:14px 0 0; padding:13px 15px; border:1px solid #682d2d; border-radius:14px; background:#291111; color:#ffb5b5; font-size:12px; font-weight:800; line-height:1.45; text-align:center; }
 .checkout-card ul { list-style:none; padding:15px 0; color:#aaa; line-height:2; }
 .checkout-card form button { width:100%; border:0; }
 .checkout-back { display:block; margin-top:20px; color:#888; text-align:center; font-size:13px; }

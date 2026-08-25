@@ -6,6 +6,7 @@ import { getSiteUrl, getStripe } from "@/lib/stripe";
 import { createClient } from "@/lib/supabase/server";
 
 export async function POST(request: Request) {
+  let returnPlan = "starter";
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -14,6 +15,7 @@ export async function POST(request: Request) {
     const form = await request.formData();
     const rawPlan = String(form.get("plan") || "");
     if (!isPlanKey(rawPlan)) return NextResponse.json({ error: "Offre inconnue" }, { status: 400 });
+    returnPlan = rawPlan;
 
     const plan = PLANS[rawPlan];
     const checkoutPrice = checkoutPriceForPlan(rawPlan);
@@ -28,6 +30,17 @@ export async function POST(request: Request) {
       .maybeSingle();
 
     const stripe = getStripe();
+    let customerId = existing?.stripe_customer_id || undefined;
+    if (customerId) {
+      try {
+        const customer = await stripe.customers.retrieve(customerId);
+        if ("deleted" in customer && customer.deleted) customerId = undefined;
+      } catch (error) {
+        console.warn("Stored Stripe customer is no longer usable; a new one will be created", error);
+        customerId = undefined;
+      }
+    }
+
     const checkoutMetadata = {
       user_id: user.id,
       plan: rawPlan,
@@ -47,8 +60,9 @@ export async function POST(request: Request) {
           recurring: plan.mode === "subscription" ? { interval: "month" } : undefined,
         },
       }],
-      customer: existing?.stripe_customer_id || undefined,
-      customer_email: existing?.stripe_customer_id ? undefined : user.email,
+      customer: customerId,
+      customer_email: customerId ? undefined : user.email,
+      customer_creation: plan.mode === "payment" && !customerId ? "always" : undefined,
       client_reference_id: user.id,
       metadata: checkoutMetadata,
       subscription_data: plan.mode === "subscription" ? { metadata: checkoutMetadata } : undefined,
@@ -62,6 +76,9 @@ export async function POST(request: Request) {
     return NextResponse.redirect(session.url, 303);
   } catch (error) {
     console.error("Stripe checkout error", error);
-    return NextResponse.json({ error: "Impossible d'ouvrir le paiement Stripe." }, { status: 500 });
+    const reason = error instanceof Error && error.message.includes("STRIPE_SECRET_KEY")
+      ? "configuration"
+      : "stripe";
+    return NextResponse.redirect(`${getSiteUrl()}/checkout/${returnPlan}?payment=error&reason=${reason}`, 303);
   }
 }
