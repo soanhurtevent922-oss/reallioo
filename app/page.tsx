@@ -61,7 +61,9 @@ export default function Home() {
       setNotice("Écris d’abord ce que tu veux voir apparaître.");
       return;
     }
-    setNotice("Ta demande est prête. Le moteur IA et l’espace membre arrivent à la prochaine étape.");
+    setNotice("Ta demande est prête. Choisis maintenant la formule qui te correspond.");
+    window.history.replaceState(null, "", "#prices");
+    document.getElementById("prices")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   return (
@@ -112,12 +114,12 @@ export default function Home() {
       <section className="examples-section" id="examples">
         <div className="split-heading"><h2>VOIS LA<br />DIFFÉRENCE.</h2><p>Une transformation spectaculaire, mais cohérente avec ta photo : même angle, mêmes ombres, même ambiance.</p></div>
         <div className="before-after" style={{ "--position": `${comparePosition}%` } as CSSProperties}>
-          <img className="compare-image compare-before" src="/reallioo-fiat-verte-originale.jpg" alt="Photo originale d’une Fiat verte" />
+          <img className="compare-image compare-before" src="/reallioo-suzuki-originale.jpg" alt="Photo originale d’une Suzuki grise" />
           <div className="compare-after-wrap">
-            <img className="compare-image compare-after" src="/reallioo-porsche-nuit.png" alt="Transformation de la Fiat verte en Porsche réalisée avec Reallioo" />
+            <img className="compare-image compare-after" src="/reallioo-porsche-verte.png" alt="Transformation de la Suzuki grise en Porsche verte réalisée avec Reallioo" />
           </div>
-          <div className="compare-label before-label"><b>AVANT</b><span>Fiat verte originale</span></div>
-          <div className="compare-label after-label"><b>APRÈS</b><span>Porsche GT3</span></div>
+          <div className="compare-label before-label"><b>AVANT</b><span>Suzuki grise originale</span></div>
+          <div className="compare-label after-label"><b>APRÈS</b><span>Porsche GT3 RS verte</span></div>
           <div className="compare-line" aria-hidden="true" />
           <div className="compare-handle" aria-hidden="true">↔</div>
           <input
