@@ -53,9 +53,14 @@ export async function POST(request: Request) {
         price_data: {
           currency: "eur",
           unit_amount: checkoutPrice.unitAmount,
+          // Reallioo is a browser-based SaaS intended for personal use.
+          // Stripe Tax requires both the product classification and how tax is
+          // included when a price is created directly inside Checkout.
+          tax_behavior: "inclusive",
           product_data: {
             name: `Reallioo ${plan.name}`,
             description: plan.creditsLabel,
+            tax_code: "txcd_10103000",
           },
           recurring: plan.mode === "subscription" ? { interval: "month" } : undefined,
         },
