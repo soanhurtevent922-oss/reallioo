@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ChangeEvent, type CSSProperties } from "react";
+import { STARTER_PROMO_PRICE, isStarterPromoActive } from "@/lib/plans";
 
 const prompts = [
   "Remplace ma voiture par une sportive rouge",
@@ -11,9 +12,9 @@ const prompts = [
 ];
 
 const plans = [
-  { key: "starter", name: "STARTER", price: "9,99 €", cadence: "/mois", credits: "40 créations / mois", details: ["Résultats HD", "1 image de référence", "Tous les univers"] },
-  { key: "creator", name: "CRÉATEUR", price: "19,99 €", cadence: "/mois", credits: "120 créations / mois", details: ["Tout Starter", "Génération prioritaire", "Plus de créations"], featured: true },
-  { key: "lifetime", name: "ACCÈS À VIE", price: "99,99 €", cadence: "une fois", credits: "200 créations incluses", details: ["Paiement unique", "Accès permanent", "Aucun abonnement"] },
+  { key: "starter", name: "STARTER", price: "19,99 €", cadence: "/mois", credits: "40 créations / mois", details: ["Résultats HD", "1 image de référence", "Tous les univers"] },
+  { key: "creator", name: "CRÉATEUR", price: "34,99 €", cadence: "/mois", credits: "120 créations / mois", details: ["Tout Starter", "Génération prioritaire", "Plus de créations"], featured: true },
+  { key: "lifetime", name: "ACCÈS À VIE", price: "250 €", cadence: "une fois", credits: "200 créations incluses", details: ["Paiement unique", "Accès permanent", "Aucun abonnement"] },
 ];
 
 const faq = [
@@ -23,6 +24,7 @@ const faq = [
   ["Combien de temps prend une création ?", "L’objectif est de produire une première version en quelques instants, puis de te laisser demander des variantes."],
   ["Mes créations sont-elles privées ?", "Tes images ne sont utilisées que pour générer ton résultat et restent accessibles depuis ton espace personnel."],
   ["Puis-je arrêter mon abonnement ?", "Oui. Toutes les formules sont sans engagement et peuvent être arrêtées depuis ton compte."],
+  ["Comment fonctionne le programme ambassadeur ?", "Dès que ton accès est actif, tu obtiens un lien personnel. Pour chaque client qui s’abonne depuis ce lien, tu gagnes 20 % de chaque mensualité tant que son abonnement reste actif. Si cette personne choisit l’accès à vie, tu gagnes 50 % du paiement unique."],
 ];
 
 const reactionExamples = [
@@ -60,6 +62,21 @@ export default function Home() {
   const [comparePosition, setComparePosition] = useState(50);
   const [trustIndex, setTrustIndex] = useState(0);
   const [recentPurchase, setRecentPurchase] = useState<string | null>(null);
+  const [starterPromoActive, setStarterPromoActive] = useState(() => isStarterPromoActive());
+
+  useEffect(() => {
+    const updatePromotion = () => setStarterPromoActive(isStarterPromoActive());
+    updatePromotion();
+    const timer = window.setInterval(updatePromotion, 60000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const referralCode = new URLSearchParams(window.location.search).get("ref")?.trim().toUpperCase();
+    if (referralCode && /^[A-Z0-9]{8,20}$/.test(referralCode)) {
+      document.cookie = `reallioo_ref=${encodeURIComponent(referralCode)}; Max-Age=2592000; Path=/; SameSite=Lax; Secure`;
+    }
+  }, []);
 
   useEffect(() => {
     const timer = window.setInterval(() => setTrustIndex((index) => index + 1), 10000);
@@ -130,6 +147,22 @@ export default function Home() {
       </section>
 
       <section className="marquee" aria-hidden="true"><div>CHANGE LA VOITURE ✦ AJOUTE QUELQU’UN ✦ PARS N’IMPORTE OÙ ✦ CRÉE L’IMPOSSIBLE ✦ CHANGE LA VOITURE ✦ AJOUTE QUELQU’UN ✦</div></section>
+
+      <section className="affiliate-section" id="ambassador">
+        <div className="affiliate-layout">
+          <div className="affiliate-copy">
+            <p>PROGRAMME AMBASSADEUR · 20 % RÉCURRENT · 50 % À VIE</p>
+            <h2>CRÉE.<br />PARTAGE.<br /><em>GAGNE À CHAQUE VENTE.</em></h2>
+            <span>Prends ton abonnement Reallioo et reçois ton lien personnel par e-mail. Chaque fois qu’un client s’abonne depuis ton lien, tu touches <strong>20 % de chaque mensualité</strong> pendant toute la durée de son abonnement. S’il choisit l’accès à vie, tu touches <strong>50 % du paiement unique</strong>.</span>
+            <a className="yellow-pill" href="#prices">Choisir mon offre <b>→</b></a>
+          </div>
+          <div className="affiliate-steps">
+            <article><b>01</b><div><h3>PRENDS TON ACCÈS</h3><p>Choisis Starter, Créateur ou l’accès à vie.</p></div></article>
+            <article><b>02</b><div><h3>PARTAGE TON LIEN</h3><p>Retrouve-le dans ton espace et reçois-le aussi par e-mail.</p></div></article>
+            <article><b>03</b><div><h3>20 % RÉCURRENT · 50 % À VIE</h3><p>20 % sur chaque mensualité active, ou 50 % sur l’accès à vie.</p></div></article>
+          </div>
+        </div>
+      </section>
 
       <section className="generator-section" id="generator">
         <header className="center-heading"><p>TON IDÉE, TA PHOTO, TON RÉSULTAT</p><h2>DIS À L’IA CE QUE<br />TU VEUX <em>VOIR.</em></h2><span>Pas besoin de savoir écrire un prompt compliqué.</span></header>
@@ -207,12 +240,19 @@ export default function Home() {
       <section className="pricing-section" id="prices">
         <header className="center-heading"><p>CHOISIS TON NIVEAU</p><h2>PLUS D’IDÉES.<br /><em>PLUS DE CRÉATIONS.</em></h2><span>Les abonnements sont sans engagement. L’accès à vie est payé une seule fois.</span></header>
         <div className="plan-grid">
-          {plans.map((plan) => <article className={plan.featured ? "plan featured" : "plan"} key={plan.name}>
-            {plan.featured && <div className="popular">LE PLUS CHOISI</div>}
-            <p>{plan.name}</p><h3>{plan.price}<small>{plan.cadence}</small></h3><strong>{plan.credits}</strong>
-            <ul>{plan.details.map((detail) => <li key={detail}>✓ {detail}</li>)}</ul>
-            <a className={plan.featured ? "yellow-pill" : "outline-pill"} href={`/checkout/${plan.key}`}>Commencer <span>→</span></a>
-          </article>)}
+          {plans.map((plan) => {
+            const hasStarterPromotion = plan.key === "starter" && starterPromoActive;
+            return <article className={plan.featured ? "plan featured" : "plan"} key={plan.name}>
+              {plan.featured && <div className="popular">LE PLUS CHOISI</div>}
+              {hasStarterPromotion && <div className="limited-offer">OFFRE 3 SEMAINES</div>}
+              <p>{plan.name}</p>
+              <h3>{hasStarterPromotion ? STARTER_PROMO_PRICE : plan.price}<small>{plan.cadence}</small></h3>
+              {hasStarterPromotion && <div className="promo-price-line"><s>19,99 €/mois</s><b>JUSQU’AU 15 SEPTEMBRE</b></div>}
+              <strong>{plan.credits}</strong>
+              <ul>{plan.details.map((detail) => <li key={detail}>✓ {detail}</li>)}</ul>
+              <a className={plan.featured ? "yellow-pill" : "outline-pill"} href={`/checkout/${plan.key}`}>Commencer <span>→</span></a>
+            </article>;
+          })}
         </div>
       </section>
 

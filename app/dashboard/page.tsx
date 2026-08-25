@@ -3,6 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { signOut } from "./actions";
 import GeneratorClient, { type GenerationCard } from "./generator-client";
+import ReferralCard from "./referral-card";
+import { ensureReferralAccount, referralUrl } from "@/lib/referrals";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +15,7 @@ export default async function DashboardPage() {
 
   const userId = String(data.claims.sub);
   const [{ data: profile }, { data: generations }] = await Promise.all([
-    supabase.from("profiles").select("plan, credits_remaining, is_admin").eq("id", userId).maybeSingle(),
+    supabase.from("profiles").select("plan, credits_remaining, is_admin, email").eq("id", userId).maybeSingle(),
     supabase
       .from("generations")
       .select("id, prompt, result_path, created_at")
@@ -40,6 +42,27 @@ export default async function DashboardPage() {
 
   const planName = profile?.is_admin ? "ADMIN" : (profile?.plan || "free").toUpperCase();
   const credits = profile?.is_admin ? null : Number(profile?.credits_remaining ?? 0);
+  const hasPaidAccess = Boolean(profile?.is_admin || (profile?.plan && profile.plan !== "free"));
+  let referralData: { link: string; referrals: number; pendingCents: number; paidCents: number } | null = null;
+
+  if (hasPaidAccess) {
+    try {
+      const account = await ensureReferralAccount(admin, userId);
+      const [{ count }, { data: commissions }] = await Promise.all([
+        admin.from("referral_attributions").select("referred_user_id", { count: "exact", head: true }).eq("referrer_user_id", userId),
+        admin.from("referral_commissions").select("commission_cents, status").eq("referrer_user_id", userId),
+      ]);
+      const totals = (commissions || []).reduce((result, commission) => {
+        const amount = Number(commission.commission_cents || 0);
+        if (commission.status === "paid") result.paidCents += amount;
+        if (commission.status === "pending" || commission.status === "approved") result.pendingCents += amount;
+        return result;
+      }, { pendingCents: 0, paidCents: 0 });
+      referralData = { link: referralUrl(account.code), referrals: count || 0, ...totals };
+    } catch (error) {
+      console.error("Referral dashboard unavailable", error);
+    }
+  }
 
   return (
     <main className="dashboard-page">
@@ -49,6 +72,7 @@ export default async function DashboardPage() {
           <a className="active" href="/dashboard">✦ Créer</a>
           <a href="#history">Mes créations</a>
           <a href="#plan">Mon abonnement</a>
+          {referralData && <a href="#ambassador">Ambassadeur</a>}
         </nav>
         <form action={signOut}><button type="submit">Se déconnecter</button></form>
       </aside>
@@ -59,6 +83,8 @@ export default async function DashboardPage() {
         </header>
 
         <GeneratorClient initialCredits={credits} initialGenerations={initialGenerations} />
+
+        {referralData && <ReferralCard {...referralData} />}
 
         <div className="dashboard-plan" id="plan">
           <div><p>TON ACCÈS</p><h2>{planName}</h2><span>{profile?.is_admin ? "Accès propriétaire illimité" : `${credits ?? 0} crédits disponibles`}</span></div>

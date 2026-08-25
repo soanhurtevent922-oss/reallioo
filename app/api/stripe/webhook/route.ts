@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { creditsForPlan, isPlanKey, type PlanKey } from "@/lib/plans";
+import { ensureReferralAccount, isReferralCode, referralUrl, sendReferralEmail } from "@/lib/referrals";
 import { getStripe } from "@/lib/stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -32,6 +33,80 @@ async function activatePlan(userId: string, plan: PlanKey, customerId: string | 
   if (subscriptionResult.error) throw subscriptionResult.error;
 }
 
+async function ensureAttribution(
+  admin: ReturnType<typeof createAdminClient>,
+  referredUserId: string,
+  plan: PlanKey,
+  referralCode: string | null | undefined,
+  subscriptionId: string | null,
+) {
+  const existing = await admin
+    .from("referral_attributions")
+    .select("referrer_user_id")
+    .eq("referred_user_id", referredUserId)
+    .maybeSingle();
+  if (existing.data?.referrer_user_id) return String(existing.data.referrer_user_id);
+  if (existing.error || !isReferralCode(referralCode)) return null;
+
+  const account = await admin
+    .from("referral_accounts")
+    .select("user_id")
+    .eq("code", referralCode)
+    .maybeSingle();
+  const referrerUserId = account.data?.user_id ? String(account.data.user_id) : null;
+  if (!referrerUserId || referrerUserId === referredUserId) return null;
+
+  const created = await admin.from("referral_attributions").insert({
+    referred_user_id: referredUserId,
+    referrer_user_id: referrerUserId,
+    referral_code: referralCode,
+    stripe_subscription_id: subscriptionId,
+    plan,
+  });
+  if (!created.error) return referrerUserId;
+  if (created.error.code !== "23505") {
+    console.error("Referral attribution could not be recorded", created.error);
+    return null;
+  }
+
+  const concurrent = await admin
+    .from("referral_attributions")
+    .select("referrer_user_id")
+    .eq("referred_user_id", referredUserId)
+    .maybeSingle();
+  return concurrent.data?.referrer_user_id ? String(concurrent.data.referrer_user_id) : null;
+}
+
+async function recordCommission(
+  admin: ReturnType<typeof createAdminClient>,
+  values: {
+    referrerUserId: string;
+    referredUserId: string;
+    stripePaymentId: string;
+    plan: PlanKey;
+    paymentKind: "subscription" | "lifetime";
+    grossAmountCents: number;
+  },
+) {
+  const commissionPercent = values.paymentKind === "lifetime" ? 50 : 20;
+  const commissionCents = Math.round(values.grossAmountCents * (commissionPercent / 100));
+  if (commissionCents <= 0) return;
+  const result = await admin.from("referral_commissions").insert({
+    referrer_user_id: values.referrerUserId,
+    referred_user_id: values.referredUserId,
+    stripe_payment_id: values.stripePaymentId,
+    plan: values.plan,
+    payment_kind: values.paymentKind,
+    gross_amount_cents: values.grossAmountCents,
+    commission_cents: commissionCents,
+    commission_percent: commissionPercent,
+    status: "pending",
+  });
+  if (result.error && result.error.code !== "23505") {
+    console.error("Referral commission could not be recorded", result.error);
+  }
+}
+
 async function processEvent(event: Stripe.Event) {
   const admin = createAdminClient();
 
@@ -40,10 +115,42 @@ async function processEvent(event: Stripe.Event) {
     const userId = session.metadata?.user_id || session.client_reference_id;
     const plan = session.metadata?.plan;
     if (userId && plan && isPlanKey(plan)) {
-      await activatePlan(userId, plan, idOf(session.customer), idOf(session.subscription));
+      const subscriptionId = idOf(session.subscription);
+      await activatePlan(userId, plan, idOf(session.customer), subscriptionId);
       const activityResult = await admin.from("purchase_activity").insert({ plan });
       if (activityResult.error) {
         console.error("Purchase activity could not be recorded", activityResult.error);
+      }
+
+      try {
+        const account = await ensureReferralAccount(admin, userId);
+        const email = session.customer_details?.email;
+        if (email && !account.email_sent_at) {
+          const sent = await sendReferralEmail(email, referralUrl(account.code));
+          if (sent) {
+            await admin.from("referral_accounts").update({ email_sent_at: new Date().toISOString() }).eq("user_id", userId);
+          }
+        }
+      } catch (error) {
+        console.error("Referral account or e-mail could not be prepared", error);
+      }
+
+      const referrerUserId = await ensureAttribution(
+        admin,
+        userId,
+        plan,
+        session.metadata?.referral_code,
+        subscriptionId,
+      );
+      if (referrerUserId && plan === "lifetime" && session.payment_status === "paid") {
+        await recordCommission(admin, {
+          referrerUserId,
+          referredUserId: userId,
+          stripePaymentId: `checkout:${session.id}`,
+          plan,
+          paymentKind: "lifetime",
+          grossAmountCents: session.amount_total || 0,
+        });
       }
     }
   }
@@ -58,6 +165,23 @@ async function processEvent(event: Stripe.Event) {
       const plan = subscription.metadata.plan;
       if (userId && plan && isPlanKey(plan)) {
         await activatePlan(userId, plan, idOf(subscription.customer), subscription.id);
+        const referrerUserId = await ensureAttribution(
+          admin,
+          userId,
+          plan,
+          subscription.metadata.referral_code,
+          subscription.id,
+        );
+        if (referrerUserId) {
+          await recordCommission(admin, {
+            referrerUserId,
+            referredUserId: userId,
+            stripePaymentId: invoice.id,
+            plan,
+            paymentKind: "subscription",
+            grossAmountCents: invoice.amount_paid,
+          });
+        }
       }
     }
   }

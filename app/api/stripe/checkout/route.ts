@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
-import { PLANS, isPlanKey } from "@/lib/plans";
+import { cookies } from "next/headers";
+import { PLANS, checkoutPriceForPlan, isPlanKey } from "@/lib/plans";
+import { isReferralCode } from "@/lib/referrals";
 import { getSiteUrl, getStripe } from "@/lib/stripe";
 import { createClient } from "@/lib/supabase/server";
 
@@ -14,8 +16,10 @@ export async function POST(request: Request) {
     if (!isPlanKey(rawPlan)) return NextResponse.json({ error: "Offre inconnue" }, { status: 400 });
 
     const plan = PLANS[rawPlan];
-    const price = process.env[plan.env];
-    if (!price) throw new Error(`${plan.env} manquante`);
+    const checkoutPrice = checkoutPriceForPlan(rawPlan);
+    const cookieStore = await cookies();
+    const storedReferral = cookieStore.get("reallioo_ref")?.value?.toUpperCase();
+    const referralCode = isReferralCode(storedReferral) ? storedReferral : undefined;
 
     const { data: existing } = await supabase
       .from("subscriptions")
@@ -24,15 +28,31 @@ export async function POST(request: Request) {
       .maybeSingle();
 
     const stripe = getStripe();
+    const checkoutMetadata = {
+      user_id: user.id,
+      plan: rawPlan,
+      ...(referralCode ? { referral_code: referralCode } : {}),
+    };
     const session = await stripe.checkout.sessions.create({
       mode: plan.mode,
-      line_items: [{ price, quantity: 1 }],
+      line_items: [{
+        quantity: 1,
+        price_data: {
+          currency: "eur",
+          unit_amount: checkoutPrice.unitAmount,
+          product_data: {
+            name: `Reallioo ${plan.name}`,
+            description: plan.creditsLabel,
+          },
+          recurring: plan.mode === "subscription" ? { interval: "month" } : undefined,
+        },
+      }],
       customer: existing?.stripe_customer_id || undefined,
       customer_email: existing?.stripe_customer_id ? undefined : user.email,
       client_reference_id: user.id,
-      metadata: { user_id: user.id, plan: rawPlan },
-      subscription_data: plan.mode === "subscription" ? { metadata: { user_id: user.id, plan: rawPlan } } : undefined,
-      payment_intent_data: plan.mode === "payment" ? { metadata: { user_id: user.id, plan: rawPlan } } : undefined,
+      metadata: checkoutMetadata,
+      subscription_data: plan.mode === "subscription" ? { metadata: checkoutMetadata } : undefined,
+      payment_intent_data: plan.mode === "payment" ? { metadata: checkoutMetadata } : undefined,
       success_url: `${getSiteUrl()}/dashboard?payment=success`,
       cancel_url: `${getSiteUrl()}/checkout/${rawPlan}?payment=cancelled`,
       allow_promotion_codes: true,
