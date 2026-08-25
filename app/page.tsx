@@ -36,6 +36,7 @@ const reactionExamples = [
 ];
 
 const trustMessages = [
+  { label: "IA OPENAI", text: "Génération d’images propulsée par OpenAI." },
   { label: "PAIEMENT PROTÉGÉ", text: "Paiement sécurisé par Stripe." },
   { label: "PACK STARTER", text: "40 créations HD chaque mois." },
   { label: "CRÉATIONS PRIVÉES", text: "Tes images restent dans ton espace." },
@@ -150,6 +151,10 @@ export default function Home() {
             <div className="prompt-chips">{prompts.map((item) => <button type="button" key={item} onClick={() => setPrompt(item)}>{item}</button>)}</div>
             <button className="yellow-pill generate-button" type="button" onClick={previewGeneration}>GÉNÉRER MA PHOTO <span>↗</span></button>
             {notice && <p className="generator-notice" role="status">{notice}</p>}
+            <div className="generator-trust" aria-label="Technologie et paiement">
+              <span>✦ IA propulsée par OpenAI</span>
+              <span>✓ Paiement sécurisé par Stripe</span>
+            </div>
           </div>
         </div>
       </section>

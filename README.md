@@ -10,6 +10,7 @@
 - le titre principal devient « Donne vie à ce qui n’existe pas encore. ».
 - une notification fixe apparaît en bas à gauche et change toutes les 10 secondes ;
 - elle affiche des informations réelles sur Reallioo et peut signaler anonymement une vraie souscription Stripe récente.
+- la mention « IA propulsée par OpenAI » apparaît près du générateur et dans les notifications, sans présenter OpenAI comme garant de la sécurité du site.
 
 SaaS B2C de création et de transformation d'images par IA.
 
