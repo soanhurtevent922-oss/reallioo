@@ -145,6 +145,13 @@ footer { display:grid; grid-template-columns:1fr auto; gap:30px; align-items:cen
 footer div { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:26px; color:#8f8f8f; font-size:13px; }
 footer p,footer small { color:#656565; }
 footer small { grid-column:1/-1; padding-top:25px; border-top:1px solid #202020; }
+.trust-toast { position:fixed; z-index:60; left:24px; bottom:82px; width:min(360px,calc(100vw - 48px)); min-height:76px; display:flex; align-items:center; gap:14px; padding:15px 18px; overflow:hidden; border:1px solid rgba(255,255,255,.2); border-radius:22px; background:linear-gradient(135deg,rgba(20,20,20,.97),rgba(5,5,5,.94)); color:#fff; box-shadow:0 18px 55px rgba(0,0,0,.5),0 0 0 1px rgba(255,212,0,.05) inset; backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); pointer-events:none; }
+.trust-toast::before { content:""; position:absolute; inset:0 auto 0 0; width:4px; background:linear-gradient(#ffe000,#ff9f19); }
+.trust-toast-icon { flex:0 0 42px; width:42px; height:42px; display:grid; place-items:center; border-radius:14px; background:var(--yellow); color:#060606; font-size:20px; font-weight:950; box-shadow:0 8px 24px rgba(255,212,0,.2); }
+.trust-toast>div { min-width:0; animation:trustToastIn .42s ease both; }
+.trust-toast b { display:block; color:var(--yellow); font-size:10px; font-weight:950; letter-spacing:.13em; }
+.trust-toast p { margin:5px 0 0; color:#ededed; font-size:13px; font-weight:750; line-height:1.35; }
+@keyframes trustToastIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
 .reaction-ticker { position:fixed; z-index:55; left:14px; right:14px; bottom:12px; min-height:54px; display:grid; grid-template-columns:auto minmax(0,1fr); overflow:hidden; border:1px solid rgba(255,255,255,.2); border-radius:999px; background:rgba(5,5,5,.93); color:#fff; box-shadow:0 18px 50px rgba(0,0,0,.48); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); pointer-events:none; }
 .reaction-label { display:flex; align-items:center; padding:0 20px; background:linear-gradient(135deg,#ffdb00,#ff9c1a); color:#050505; font-size:10px; font-weight:950; letter-spacing:.12em; white-space:nowrap; }
 .reaction-viewport { min-width:0; overflow:hidden; mask-image:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent); -webkit-mask-image:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent); }
@@ -205,6 +212,10 @@ footer small { grid-column:1/-1; padding-top:25px; border-top:1px solid #202020;
   .final-cta { padding:100px 16px; }
   footer { grid-template-columns:1fr; padding-bottom:130px; }
   footer div { justify-content:flex-start; }
+  .trust-toast { left:10px; bottom:66px; width:min(315px,calc(100vw - 20px)); min-height:66px; gap:11px; padding:12px 14px; border-radius:18px; }
+  .trust-toast-icon { flex-basis:38px; width:38px; height:38px; border-radius:12px; font-size:17px; }
+  .trust-toast b { font-size:8px; }
+  .trust-toast p { margin-top:4px; font-size:11px; }
   .reaction-ticker { left:8px; right:8px; bottom:8px; min-height:48px; }
   .reaction-label { max-width:126px; padding:0 11px; white-space:normal; text-align:center; font-size:8px; line-height:1.1; }
   .reaction-track { min-height:48px; }
@@ -214,6 +225,7 @@ footer small { grid-column:1/-1; padding-top:25px; border-top:1px solid #202020;
 
 @media (prefers-reduced-motion:reduce) {
   * { scroll-behavior:auto!important; animation-duration:.001ms!important; animation-iteration-count:1!important; }
+  .trust-toast>div { animation:none!important; }
   .reaction-track { animation:none!important; transform:none; }
   .reaction-group[aria-hidden="true"] { display:none; }
 }

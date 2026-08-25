@@ -41,6 +41,10 @@ async function processEvent(event: Stripe.Event) {
     const plan = session.metadata?.plan;
     if (userId && plan && isPlanKey(plan)) {
       await activatePlan(userId, plan, idOf(session.customer), idOf(session.subscription));
+      const activityResult = await admin.from("purchase_activity").insert({ plan });
+      if (activityResult.error) {
+        console.error("Purchase activity could not be recorded", activityResult.error);
+      }
     }
   }
 

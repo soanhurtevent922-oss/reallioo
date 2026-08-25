@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type ChangeEvent, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type CSSProperties } from "react";
 
 const prompts = [
   "Remplace ma voiture par une sportive rouge",
@@ -35,6 +35,19 @@ const reactionExamples = [
   "Tous mes potes sont jaloux du rendu 🤯",
 ];
 
+const trustMessages = [
+  { label: "PAIEMENT PROTÉGÉ", text: "Paiement sécurisé par Stripe." },
+  { label: "PACK STARTER", text: "40 créations HD chaque mois." },
+  { label: "CRÉATIONS PRIVÉES", text: "Tes images restent dans ton espace." },
+  { label: "ACCÈS À VIE", text: "Un paiement unique, sans abonnement." },
+];
+
+const purchasePlanLabels: Record<string, string> = {
+  starter: "Starter",
+  creator: "Créateur",
+  lifetime: "Accès à vie",
+};
+
 export default function Home() {
   const sourceInput = useRef<HTMLInputElement>(null);
   const referenceInput = useRef<HTMLInputElement>(null);
@@ -44,6 +57,36 @@ export default function Home() {
   const [notice, setNotice] = useState("");
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [comparePosition, setComparePosition] = useState(50);
+  const [trustIndex, setTrustIndex] = useState(0);
+  const [recentPurchase, setRecentPurchase] = useState<string | null>(null);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setTrustIndex((index) => index + 1), 10000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    async function loadRecentPurchase() {
+      try {
+        const response = await fetch("/api/activity/recent", { cache: "no-store" });
+        if (!response.ok) return;
+        const data = await response.json();
+        const label = purchasePlanLabels[data.activity?.plan];
+        setRecentPurchase(label || null);
+      } catch {
+        setRecentPurchase(null);
+      }
+    }
+
+    loadRecentPurchase();
+    const timer = window.setInterval(loadRecentPurchase, 30000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  const visibleTrustMessages = recentPurchase
+    ? [{ label: "NOUVELLE SOUSCRIPTION", text: `Quelqu’un vient de choisir le pack ${recentPurchase}.` }, ...trustMessages]
+    : trustMessages;
+  const currentTrustMessage = visibleTrustMessages[trustIndex % visibleTrustMessages.length];
 
   function loadImage(event: ChangeEvent<HTMLInputElement>, setter: (value: string) => void) {
     const file = event.target.files?.[0];
@@ -175,6 +218,13 @@ export default function Home() {
 
       <section className="final-cta"><p>TA PROCHAINE PHOTO VA FAIRE PARLER.</p><h2>CRÉE CE QUE<br />LES AUTRES<br /><em>N’OSENT PAS.</em></h2><a className="yellow-pill" href="#generator">Démarrer maintenant <span>→</span></a></section>
       <footer><a className="logo" href="#top">REALLI<span>OO</span></a><div><a href="#examples">Exemples</a><a href="#prices">Tarifs</a><a href="#top">Confidentialité</a><a href="#top">CGU</a></div><p>Création d’images IA réalistes et responsables.</p><small>© 2026 Reallioo — Tous droits réservés.</small></footer>
+      <aside className="trust-toast" aria-live="polite" aria-label="Information Reallioo">
+        <span className="trust-toast-icon">✓</span>
+        <div key={`${currentTrustMessage.label}-${trustIndex}`}>
+          <b>{currentTrustMessage.label}</b>
+          <p>{currentTrustMessage.text}</p>
+        </div>
+      </aside>
       <aside className="reaction-ticker" aria-label="Exemples de réactions">
         <span className="reaction-label">RÉACTIONS DE LA COMMUNAUTÉ</span>
         <div className="reaction-viewport">

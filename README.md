@@ -8,6 +8,8 @@
 - exemple avant/après remplacé par la Suzuki grise et la Porsche GT3 RS verte.
 - le bouton « GÉNÉRER MA PHOTO » de la démo redirige vers les tarifs lorsque la photo et la demande sont renseignées.
 - le titre principal devient « Donne vie à ce qui n’existe pas encore. ».
+- une notification fixe apparaît en bas à gauche et change toutes les 10 secondes ;
+- elle affiche des informations réelles sur Reallioo et peut signaler anonymement une vraie souscription Stripe récente.
 
 SaaS B2C de création et de transformation d'images par IA.
 
@@ -31,6 +33,8 @@ OPENAI_API_KEY=
 ```
 
 Exécuter aussi `supabase/ai-generation.sql` une fois dans le SQL Editor Supabase.
+
+Exécuter également `supabase/purchase-activity.sql` une fois dans le SQL Editor Supabase pour activer les notifications de souscriptions réelles.
 
 Le moteur produit des images WebP en `1152 × 2048` (9:16), qualité `medium`, à partir d’une photo principale et d’une référence facultative.
 
