@@ -7,6 +7,7 @@
 - vitesse du bandeau des réactions conservée.
 - exemple avant/après remplacé par la Suzuki grise et la Porsche GT3 RS verte.
 - le bouton « GÉNÉRER MA PHOTO » de la démo redirige vers les tarifs lorsque la photo et la demande sont renseignées.
+- le titre principal devient « Donne vie à ce qui n’existe pas encore. ».
 
 SaaS B2C de création et de transformation d'images par IA.
 

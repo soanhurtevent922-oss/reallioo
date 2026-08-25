@@ -79,7 +79,7 @@ export default function Home() {
         <div className="moving-wall wall-two" />
         <div className="hero-overlay" />
         <div className="version-pill"><i /> LA CRÉATION IA NOUVELLE GÉNÉRATION</div>
-        <div className="hero-title"><span>IMAGINE.</span><strong>ÉCRIS.</strong><span>ÇA DEVIENT</span><strong>RÉEL.</strong></div>
+        <div className="hero-title"><span>DONNE VIE À</span><strong>CE QUI</strong><span>N’EXISTE PAS</span><strong>ENCORE.</strong></div>
         <p className="hero-sub">Change une voiture, un décor, une tenue ou toute une scène. Ajoute une image de référence et crée une photo impossible à distinguer du réel.</p>
         <a className="yellow-pill hero-button" href="#generator">Créer ma photo <b>→</b></a>
         <div className="micro-proof"><span>✦ PHOTO ORIGINALE</span><span>＋</span><span>✦ IMAGE DE RÉFÉRENCE</span><span>＋</span><span>✦ TON IDÉE</span></div>
