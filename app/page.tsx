@@ -25,6 +25,16 @@ const faq = [
   ["Puis-je arrêter mon abonnement ?", "Oui. Toutes les formules sont sans engagement et peuvent être arrêtées depuis ton compte."],
 ];
 
+const reactionExamples = [
+  "Le rendu est trop propre, mes potes ont cru que c’était réel 😳",
+  "Mon profil a pris un niveau direct 🔥",
+  "J’ai changé ma voiture en quelques secondes, c’est abusé 🤯",
+  "Le avant / après est incroyable ⚡",
+  "J’ai testé pour rire… maintenant je refais toutes mes photos 😂",
+  "Ça ressemble vraiment à une photo prise sur place 👀",
+  "Tous mes potes sont jaloux du rendu 🤯",
+];
+
 export default function Home() {
   const sourceInput = useRef<HTMLInputElement>(null);
   const referenceInput = useRef<HTMLInputElement>(null);
@@ -102,12 +112,12 @@ export default function Home() {
       <section className="examples-section" id="examples">
         <div className="split-heading"><h2>VOIS LA<br />DIFFÉRENCE.</h2><p>Une transformation spectaculaire, mais cohérente avec ta photo : même angle, mêmes ombres, même ambiance.</p></div>
         <div className="before-after" style={{ "--position": `${comparePosition}%` } as CSSProperties}>
-          <img className="compare-image compare-before" src="/reallioo-voiture-originale.webp" alt="Photo originale d’une voiture blanche" />
+          <img className="compare-image compare-before" src="/reallioo-fiat-verte-originale.jpg" alt="Photo originale d’une Fiat verte" />
           <div className="compare-after-wrap">
-            <img className="compare-image compare-after" src="/reallioo-porsche.webp" alt="Transformation en Porsche sportive réalisée avec Reallioo" />
+            <img className="compare-image compare-after" src="/reallioo-porsche-nuit.png" alt="Transformation de la Fiat verte en Porsche réalisée avec Reallioo" />
           </div>
-          <div className="compare-label before-label"><b>AVANT</b><span>Voiture blanche originale</span></div>
-          <div className="compare-label after-label"><b>APRÈS</b><span>Porsche GT3 RS</span></div>
+          <div className="compare-label before-label"><b>AVANT</b><span>Fiat verte originale</span></div>
+          <div className="compare-label after-label"><b>APRÈS</b><span>Porsche GT3</span></div>
           <div className="compare-line" aria-hidden="true" />
           <div className="compare-handle" aria-hidden="true">↔</div>
           <input
@@ -163,6 +173,22 @@ export default function Home() {
 
       <section className="final-cta"><p>TA PROCHAINE PHOTO VA FAIRE PARLER.</p><h2>CRÉE CE QUE<br />LES AUTRES<br /><em>N’OSENT PAS.</em></h2><a className="yellow-pill" href="#generator">Démarrer maintenant <span>→</span></a></section>
       <footer><a className="logo" href="#top">REALLI<span>OO</span></a><div><a href="#examples">Exemples</a><a href="#prices">Tarifs</a><a href="#top">Confidentialité</a><a href="#top">CGU</a></div><p>Création d’images IA réalistes et responsables.</p><small>© 2026 Reallioo — Tous droits réservés.</small></footer>
+      <aside className="reaction-ticker" aria-label="Exemples de réactions">
+        <span className="reaction-label">RÉACTIONS DE LA COMMUNAUTÉ · EXEMPLES</span>
+        <div className="reaction-viewport">
+          <div className="reaction-track">
+            {[0, 1].map((copy) => (
+              <div className="reaction-group" aria-hidden={copy === 1} key={copy}>
+                {reactionExamples.map((reaction) => (
+                  <span className="reaction-item" key={`${copy}-${reaction}`}>
+                    <b>✦</b>{reaction}
+                  </span>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+      </aside>
       <a className="floating-create" href="#generator" aria-label="Créer une photo">✦<span>CRÉER</span></a>
     </main>
   );

@@ -19,7 +19,7 @@ button { color:inherit; }
 .yellow-pill.compact { min-height:62px; padding:0 26px; font-size:14px; }
 
 .viral-hero { position:relative; min-height:1080px; padding:170px 24px 70px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; overflow:hidden; }
-.moving-wall { position:absolute; inset:-8%; background-image:url('/reallioo-couple.webp'),url('/reallioo-porsche.webp'),url('/reallioo-voiture-originale.webp'); background-repeat:no-repeat,no-repeat,no-repeat; background-size:39% 92%,39% 92%,39% 92%; background-position:left center,center center,right center; filter:saturate(.9) contrast(1.05); transform:scale(1.06); animation:wallFloat 16s ease-in-out infinite alternate; }
+.moving-wall { position:absolute; inset:-8%; background-image:url('/reallioo-photo-miroir.png'),url('/reallioo-liasse.png'),url('/reallioo-bouteille.png'); background-repeat:no-repeat,no-repeat,no-repeat; background-size:39% 92%,39% 92%,39% 92%; background-position:left center,center center,right center; filter:saturate(.9) contrast(1.05); transform:scale(1.06); animation:wallFloat 16s ease-in-out infinite alternate; }
 .wall-two { inset:-14%; opacity:.2; background-size:34% 78%,34% 78%,34% 78%; background-position:2% 20%,50% 78%,98% 25%; filter:blur(3px) saturate(1.1); animation-duration:22s; animation-direction:alternate-reverse; }
 @keyframes wallFloat { from { transform:scale(1.06) translate3d(-1.5%,0,0); } to { transform:scale(1.11) translate3d(1.5%,-2%,0); } }
 .hero-overlay { position:absolute; inset:0; background:linear-gradient(180deg,rgba(0,0,0,.48),rgba(0,0,0,.18) 35%,rgba(0,0,0,.75) 83%,#060606),radial-gradient(circle at 50% 42%,transparent 0,rgba(0,0,0,.35) 68%); }
@@ -145,7 +145,15 @@ footer { display:grid; grid-template-columns:1fr auto; gap:30px; align-items:cen
 footer div { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:26px; color:#8f8f8f; font-size:13px; }
 footer p,footer small { color:#656565; }
 footer small { grid-column:1/-1; padding-top:25px; border-top:1px solid #202020; }
-.floating-create { position:fixed; z-index:45; right:24px; bottom:22px; width:88px; height:88px; display:flex; flex-direction:column; align-items:center; justify-content:center; border:5px solid #080808; border-radius:28px; background:var(--yellow); color:#050505; box-shadow:0 12px 40px rgba(255,212,0,.25); font-size:26px; font-weight:950; transform:rotate(3deg); }
+.reaction-ticker { position:fixed; z-index:55; left:14px; right:14px; bottom:12px; min-height:54px; display:grid; grid-template-columns:auto minmax(0,1fr); overflow:hidden; border:1px solid rgba(255,255,255,.2); border-radius:999px; background:rgba(5,5,5,.93); color:#fff; box-shadow:0 18px 50px rgba(0,0,0,.48); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); pointer-events:none; }
+.reaction-label { display:flex; align-items:center; padding:0 20px; background:linear-gradient(135deg,#ffdb00,#ff9c1a); color:#050505; font-size:10px; font-weight:950; letter-spacing:.12em; white-space:nowrap; }
+.reaction-viewport { min-width:0; overflow:hidden; mask-image:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent); -webkit-mask-image:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent); }
+.reaction-track { width:max-content; display:flex; align-items:center; min-height:54px; animation:reactionScroll 38s linear infinite; will-change:transform; }
+.reaction-group { flex:none; display:flex; align-items:center; }
+.reaction-item { flex:none; display:flex; align-items:center; gap:9px; margin-right:38px; white-space:nowrap; color:#dedede; font-size:13px; font-weight:800; }
+.reaction-item b { color:var(--yellow); font-size:16px; }
+@keyframes reactionScroll { to { transform:translateX(-50%); } }
+.floating-create { position:fixed; z-index:45; right:24px; bottom:78px; width:88px; height:88px; display:flex; flex-direction:column; align-items:center; justify-content:center; border:5px solid #080808; border-radius:28px; background:var(--yellow); color:#050505; box-shadow:0 12px 40px rgba(255,212,0,.25); font-size:26px; font-weight:950; transform:rotate(3deg); }
 .floating-create span { font-size:9px; letter-spacing:.08em; }
 
 @media (max-width:900px) {
@@ -197,10 +205,18 @@ footer small { grid-column:1/-1; padding-top:25px; border-top:1px solid #202020;
   .final-cta { padding:100px 16px; }
   footer { grid-template-columns:1fr; padding-bottom:130px; }
   footer div { justify-content:flex-start; }
-  .floating-create { right:14px; bottom:14px; width:74px; height:74px; border-radius:24px; }
+  .reaction-ticker { left:8px; right:8px; bottom:8px; min-height:48px; }
+  .reaction-label { max-width:126px; padding:0 11px; white-space:normal; text-align:center; font-size:8px; line-height:1.1; }
+  .reaction-track { min-height:48px; }
+  .reaction-item { margin-right:28px; font-size:11px; }
+  .floating-create { right:14px; bottom:68px; width:74px; height:74px; border-radius:24px; }
 }
 
-@media (prefers-reduced-motion:reduce) { * { scroll-behavior:auto!important; animation-duration:.001ms!important; animation-iteration-count:1!important; } }
+@media (prefers-reduced-motion:reduce) {
+  * { scroll-behavior:auto!important; animation-duration:.001ms!important; animation-iteration-count:1!important; }
+  .reaction-track { animation:none!important; transform:none; }
+  .reaction-group[aria-hidden="true"] { display:none; }
+}
 
 .auth-page { min-height:100vh; padding:28px; display:grid; place-items:center; background:radial-gradient(circle at 15% 15%,#473b00 0,transparent 34%),radial-gradient(circle at 85% 82%,#2b1d00 0,transparent 34%),#070707; }
 .auth-logo { position:absolute; top:32px; left:38px; font-size:25px; font-weight:950; letter-spacing:-.07em; }
