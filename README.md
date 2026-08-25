@@ -1,5 +1,11 @@
 # Reallioo
 
+## Mise à jour du 25 août 2026
+
+- animation des images du haut accélérée ;
+- libellé du bandeau simplifié en « RÉACTIONS DE LA COMMUNAUTÉ » ;
+- vitesse du bandeau des réactions conservée.
+
 SaaS B2C de création et de transformation d'images par IA.
 
 ## Stack

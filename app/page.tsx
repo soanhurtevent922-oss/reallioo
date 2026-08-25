@@ -174,7 +174,7 @@ export default function Home() {
       <section className="final-cta"><p>TA PROCHAINE PHOTO VA FAIRE PARLER.</p><h2>CRÉE CE QUE<br />LES AUTRES<br /><em>N’OSENT PAS.</em></h2><a className="yellow-pill" href="#generator">Démarrer maintenant <span>→</span></a></section>
       <footer><a className="logo" href="#top">REALLI<span>OO</span></a><div><a href="#examples">Exemples</a><a href="#prices">Tarifs</a><a href="#top">Confidentialité</a><a href="#top">CGU</a></div><p>Création d’images IA réalistes et responsables.</p><small>© 2026 Reallioo — Tous droits réservés.</small></footer>
       <aside className="reaction-ticker" aria-label="Exemples de réactions">
-        <span className="reaction-label">RÉACTIONS DE LA COMMUNAUTÉ · EXEMPLES</span>
+        <span className="reaction-label">RÉACTIONS DE LA COMMUNAUTÉ</span>
         <div className="reaction-viewport">
           <div className="reaction-track">
             {[0, 1].map((copy) => (
