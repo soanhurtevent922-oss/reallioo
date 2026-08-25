@@ -11,6 +11,7 @@
 - une notification fixe apparaît en bas à gauche et change toutes les 10 secondes ;
 - elle affiche des informations réelles sur Reallioo et peut signaler anonymement une vraie souscription Stripe récente.
 - la mention « IA propulsée par OpenAI » apparaît près du générateur et dans les notifications, sans présenter OpenAI comme garant de la sécurité du site.
+- Vercel Web Analytics est chargé sur toutes les pages via le script officiel `/_vercel/insights/script.js`.
 
 SaaS B2C de création et de transformation d'images par IA.
 

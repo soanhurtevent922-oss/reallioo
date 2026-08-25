@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -22,5 +23,16 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="fr"><body>{children}</body></html>;
+  return (
+    <html lang="fr">
+      <body>
+        {children}
+        <Script
+          id="vercel-web-analytics"
+          src="/_vercel/insights/script.js"
+          strategy="afterInteractive"
+        />
+      </body>
+    </html>
+  );
 }
