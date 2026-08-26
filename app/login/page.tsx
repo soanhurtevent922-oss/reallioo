@@ -37,6 +37,7 @@ export default function LoginPage() {
         <h1>Content de<br />te revoir.</h1>
         <label>E-mail<input type="email" required value={email} onChange={(event) => setEmail(event.target.value)} placeholder="toi@email.com" /></label>
         <label>Mot de passe<input type="password" required minLength={6} value={password} onChange={(event) => setPassword(event.target.value)} placeholder="••••••••" /></label>
+        <Link className="auth-help-link" href="/forgot-password">Mot de passe oublié ?</Link>
         {message && <div className="auth-message" role="alert">{message}</div>}
         <button className="yellow-pill" disabled={loading}>{loading ? "Connexion…" : "Se connecter →"}</button>
         <span>Pas encore de compte ? <Link href={`/register${typeof window !== "undefined" ? window.location.search : ""}`}>Créer mon compte</Link></span>

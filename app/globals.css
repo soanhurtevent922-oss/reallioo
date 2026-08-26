@@ -269,6 +269,7 @@ footer small { grid-column:1/-1; padding-top:25px; border-top:1px solid #202020;
 .auth-card button { width:100%; border:0; margin-top:7px; }
 .auth-card>span { color:#8d8d8d; text-align:center; font-size:13px; }
 .auth-card>span a { color:var(--yellow); font-weight:850; }
+.auth-help-link { margin-top:-8px; color:var(--yellow); font-size:13px; font-weight:850; text-align:right; }
 .auth-message { padding:13px 15px; border:1px solid #5a4c00; border-radius:14px; background:#201d08; color:#ffe76f; font-size:13px; line-height:1.4; }
 
 .checkout-page { min-height:100vh; padding:110px 24px 60px; display:grid; place-items:center; background:radial-gradient(circle at 10% 10%,#473b00 0,transparent 34%),radial-gradient(circle at 88% 84%,#2b1d00 0,transparent 35%),#070707; }
