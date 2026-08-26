@@ -250,7 +250,7 @@ export default function Home() {
               {hasStarterPromotion && <div className="promo-price-line"><s>19,99 €/mois</s><b>JUSQU’AU 15 SEPTEMBRE</b></div>}
               <strong>{plan.credits}</strong>
               <ul>{plan.details.map((detail) => <li key={detail}>✓ {detail}</li>)}</ul>
-              <a className={plan.featured ? "yellow-pill" : "outline-pill"} href={`/checkout/${plan.key}`}>Commencer <span>→</span></a>
+              <a className={plan.featured ? "yellow-pill" : "outline-pill"} href={`/start/${plan.key}`}>Commencer <span>→</span></a>
             </article>;
           })}
         </div>

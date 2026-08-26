@@ -284,6 +284,10 @@ footer small { grid-column:1/-1; padding-top:25px; border-top:1px solid #202020;
 .checkout-card ul { list-style:none; padding:15px 0; color:#aaa; line-height:2; }
 .checkout-card form button { width:100%; border:0; }
 .checkout-back { display:block; margin-top:20px; color:#888; text-align:center; font-size:13px; }
+.checkout-choice-copy { margin:-12px 0 28px!important; color:#aaa!important; font-size:15px!important; font-weight:650!important; letter-spacing:0!important; line-height:1.55; }
+.checkout-choice-actions { display:grid; gap:12px; margin-top:26px; }
+.checkout-choice-actions .yellow-pill,.checkout-choice-actions .outline-pill { width:100%; min-height:64px; }
+.checkout-choice-note { display:block; margin-top:18px; color:#777; font-size:12px; font-weight:750; text-align:center; }
 
 .dashboard-page { min-height:100vh; display:grid; grid-template-columns:250px 1fr; background:#f4f4ee; color:#0a0a0a; }
 .dashboard-sidebar { min-height:100vh; position:sticky; top:0; display:flex; flex-direction:column; padding:34px 24px; background:#090909; color:#fff; }

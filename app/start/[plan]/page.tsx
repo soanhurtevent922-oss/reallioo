@@ -5,40 +5,41 @@ import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
-export default async function CheckoutPage({
+export default async function StartPlanPage({
   params,
-  searchParams,
 }: {
   params: Promise<{ plan: string }>;
-  searchParams: Promise<{ payment?: string; reason?: string }>;
 }) {
   const { plan: rawPlan } = await params;
-  const query = await searchParams;
   if (!isPlanKey(rawPlan)) notFound();
 
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect(`/start/${rawPlan}`);
+  if (user) redirect(`/checkout/${rawPlan}`);
 
   const plan = PLANS[rawPlan];
   const checkoutPrice = checkoutPriceForPlan(rawPlan);
+  const next = encodeURIComponent(`/checkout/${rawPlan}`);
+
   return (
     <main className="checkout-page">
       <Link className="auth-logo" href="/">REALLI<span>OO</span></Link>
       <section className="checkout-card">
-        <p>PAIEMENT SÉCURISÉ PAR STRIPE</p>
-        <h1>Ton offre<br />{plan.name.toLowerCase()}.</h1>
+        <p>AVANT DE CONTINUER</p>
+        <h1>Relie l’offre<br />à ton compte.</h1>
+        <p className="checkout-choice-copy">
+          Crée ton compte ou connecte-toi pour rattacher ton abonnement et ton paiement à ton espace Reallioo.
+        </p>
         <div className="checkout-summary">
-          <span>{plan.creditsLabel}</span>
+          <span>Offre {plan.name.toLowerCase()} · {plan.creditsLabel}</span>
           <strong>{checkoutPrice.price}<small>{plan.cadence}</small></strong>
         </div>
         {checkoutPrice.promotional && <p className="checkout-promo">OFFRE LIMITÉE · AU LIEU DE 19,99 € · JUSQU’AU 15 SEPTEMBRE</p>}
-        {query.payment === "error" && <p className="checkout-error">Le paiement Stripe n’a pas pu s’ouvrir. Vérifie la clé Stripe dans Vercel, puis réessaie.</p>}
-        <ul><li>✓ Résultats haute définition</li><li>✓ Image de référence</li><li>✓ Créations privées</li></ul>
-        <form action="/api/stripe/checkout" method="post">
-          <input type="hidden" name="plan" value={rawPlan} />
-          <button className="yellow-pill" type="submit">Continuer vers Stripe →</button>
-        </form>
+        <div className="checkout-choice-actions">
+          <Link className="yellow-pill" href={`/register?next=${next}`}>Créer mon compte →</Link>
+          <Link className="outline-pill" href={`/login?next=${next}`}>J’ai déjà un compte</Link>
+        </div>
+        <span className="checkout-choice-note">Aucun paiement ne peut être lancé sans compte connecté.</span>
         <Link className="checkout-back" href="/#prices">← Revenir aux offres</Link>
       </section>
     </main>

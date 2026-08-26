@@ -23,6 +23,14 @@ export async function updateSession(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const signedIn = Boolean(data?.claims);
 
+  if (request.nextUrl.pathname.startsWith("/checkout/") && !signedIn) {
+    const plan = request.nextUrl.pathname.slice("/checkout/".length).split("/")[0];
+    const url = request.nextUrl.clone();
+    url.pathname = `/start/${plan}`;
+    url.search = "";
+    return NextResponse.redirect(url);
+  }
+
   if (request.nextUrl.pathname.startsWith("/dashboard") && !signedIn) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
