@@ -32,10 +32,6 @@ export const PLANS = {
   },
 } as const;
 
-export const STARTER_PROMO_END = "2026-09-15T21:59:59.999Z";
-export const STARTER_PROMO_PRICE = "10,99 €";
-export const STARTER_PROMO_UNIT_AMOUNT = 1099;
-
 export type PlanKey = keyof typeof PLANS;
 
 export function isPlanKey(value: string): value is PlanKey {
@@ -46,13 +42,6 @@ export function creditsForPlan(plan: PlanKey) {
   return PLANS[plan].credits;
 }
 
-export function isStarterPromoActive(now = new Date()) {
-  return now.getTime() <= new Date(STARTER_PROMO_END).getTime();
-}
-
-export function checkoutPriceForPlan(plan: PlanKey, now = new Date()) {
-  if (plan === "starter" && isStarterPromoActive(now)) {
-    return { price: STARTER_PROMO_PRICE, unitAmount: STARTER_PROMO_UNIT_AMOUNT, promotional: true };
-  }
-  return { price: PLANS[plan].price, unitAmount: PLANS[plan].unitAmount, promotional: false };
+export function checkoutPriceForPlan(plan: PlanKey) {
+  return { price: PLANS[plan].price, unitAmount: PLANS[plan].unitAmount };
 }

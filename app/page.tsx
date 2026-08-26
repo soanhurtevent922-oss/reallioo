@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState, type ChangeEvent, type CSSProperties } from "react";
-import { STARTER_PROMO_PRICE, isStarterPromoActive } from "@/lib/plans";
 
 const prompts = [
   "Remplace ma voiture par une sportive rouge",
@@ -62,15 +61,6 @@ export default function Home() {
   const [comparePosition, setComparePosition] = useState(50);
   const [trustIndex, setTrustIndex] = useState(0);
   const [recentPurchase, setRecentPurchase] = useState<string | null>(null);
-  const [starterPromoActive, setStarterPromoActive] = useState(() => isStarterPromoActive());
-
-  useEffect(() => {
-    const updatePromotion = () => setStarterPromoActive(isStarterPromoActive());
-    updatePromotion();
-    const timer = window.setInterval(updatePromotion, 60000);
-    return () => window.clearInterval(timer);
-  }, []);
-
   useEffect(() => {
     const referralCode = new URLSearchParams(window.location.search).get("ref")?.trim().toUpperCase();
     if (referralCode && /^[A-Z0-9]{8,20}$/.test(referralCode)) {
@@ -240,19 +230,16 @@ export default function Home() {
       <section className="pricing-section" id="prices">
         <header className="center-heading"><p>CHOISIS TON NIVEAU</p><h2>PLUS D’IDÉES.<br /><em>PLUS DE CRÉATIONS.</em></h2><span>Les abonnements sont sans engagement. L’accès à vie est payé une seule fois.</span></header>
         <div className="plan-grid">
-          {plans.map((plan) => {
-            const hasStarterPromotion = plan.key === "starter" && starterPromoActive;
-            return <article className={plan.featured ? "plan featured" : "plan"} key={plan.name}>
+          {plans.map((plan) => (
+            <article className={plan.featured ? "plan featured" : "plan"} key={plan.name}>
               {plan.featured && <div className="popular">LE PLUS CHOISI</div>}
-              {hasStarterPromotion && <div className="limited-offer">OFFRE 3 SEMAINES</div>}
               <p>{plan.name}</p>
-              <h3>{hasStarterPromotion ? STARTER_PROMO_PRICE : plan.price}<small>{plan.cadence}</small></h3>
-              {hasStarterPromotion && <div className="promo-price-line"><s>19,99 €/mois</s><b>JUSQU’AU 15 SEPTEMBRE</b></div>}
+              <h3>{plan.price}<small>{plan.cadence}</small></h3>
               <strong>{plan.credits}</strong>
               <ul>{plan.details.map((detail) => <li key={detail}>✓ {detail}</li>)}</ul>
               <a className={plan.featured ? "yellow-pill" : "outline-pill"} href={`/start/${plan.key}`}>Commencer <span>→</span></a>
-            </article>;
-          })}
+            </article>
+          ))}
         </div>
       </section>
 

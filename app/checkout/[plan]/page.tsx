@@ -32,7 +32,6 @@ export default async function CheckoutPage({
           <span>{plan.creditsLabel}</span>
           <strong>{checkoutPrice.price}<small>{plan.cadence}</small></strong>
         </div>
-        {checkoutPrice.promotional && <p className="checkout-promo">OFFRE LIMITÉE · AU LIEU DE 19,99 € · JUSQU’AU 15 SEPTEMBRE</p>}
         {query.payment === "error" && <p className="checkout-error">Le paiement Stripe n’a pas pu s’ouvrir. Vérifie la clé Stripe dans Vercel, puis réessaie.</p>}
         <ul><li>✓ Résultats haute définition</li><li>✓ Image de référence</li><li>✓ Créations privées</li></ul>
         <form action="/api/stripe/checkout" method="post">

@@ -34,7 +34,6 @@ export default async function StartPlanPage({
           <span>Offre {plan.name.toLowerCase()} · {plan.creditsLabel}</span>
           <strong>{checkoutPrice.price}<small>{plan.cadence}</small></strong>
         </div>
-        {checkoutPrice.promotional && <p className="checkout-promo">OFFRE LIMITÉE · AU LIEU DE 19,99 € · JUSQU’AU 15 SEPTEMBRE</p>}
         <div className="checkout-choice-actions">
           <Link className="yellow-pill" href={`/register?next=${next}`}>Créer mon compte →</Link>
           <Link className="outline-pill" href={`/login?next=${next}`}>J’ai déjà un compte</Link>
