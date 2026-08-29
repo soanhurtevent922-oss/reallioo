@@ -1,7 +1,16 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import type { PlanKey } from "@/lib/plans";
 import { getSiteUrl } from "@/lib/stripe";
 
-export const REFERRAL_COMMISSION_PERCENT = 20;
+export const REFERRAL_COMMISSION_PERCENT: Record<PlanKey, number> = {
+  starter: 40,
+  creator: 50,
+  lifetime: 50,
+};
+
+export function referralCommissionPercent(plan: PlanKey) {
+  return REFERRAL_COMMISSION_PERCENT[plan];
+}
 
 export type ReferralAccount = {
   user_id: string;
@@ -65,7 +74,7 @@ export async function sendReferralEmail(email: string, link: string) {
       from,
       to: [email],
       subject: "Ton lien ambassadeur Reallioo est prêt",
-      html: `<div style="font-family:Arial,sans-serif;max-width:560px;margin:auto;padding:32px;color:#111"><h1 style="font-size:30px">Ton lien est prêt ✦</h1><p>Merci de faire partie de Reallioo.</p><p>Partage ton lien personnel. Pour chaque nouveau client qui souscrit depuis ce lien, tu gagnes <strong>20 % de chaque mensualité</strong> tant que son abonnement reste actif. S’il choisit l’accès à vie, tu gagnes <strong>50 % du paiement unique</strong>.</p><p style="margin:28px 0"><a href="${link}" style="display:inline-block;padding:16px 24px;border-radius:999px;background:#ffd400;color:#050505;text-decoration:none;font-weight:800">Ouvrir mon lien ambassadeur</a></p><p style="font-size:13px;color:#666;word-break:break-all">${link}</p></div>`,
+      html: `<div style="font-family:Arial,sans-serif;max-width:560px;margin:auto;padding:32px;color:#111"><h1 style="font-size:30px">Ton lien est prêt ✦</h1><p>Merci de faire partie de Reallioo.</p><p>Partage ton lien personnel. Tu gagnes <strong>40 % de chaque mensualité Starter</strong> et <strong>50 % de chaque mensualité Créateur</strong> tant que l’abonnement apporté reste actif. Si la personne choisit l’accès à vie, tu gagnes <strong>50 % du paiement unique</strong>.</p><p style="margin:28px 0"><a href="${link}" style="display:inline-block;padding:16px 24px;border-radius:999px;background:#ffd400;color:#050505;text-decoration:none;font-weight:800">Ouvrir mon lien ambassadeur</a></p><p style="font-size:13px;color:#666;word-break:break-all">${link}</p></div>`,
     }),
   });
 

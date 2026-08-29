@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { creditsForPlan, isPlanKey, type PlanKey } from "@/lib/plans";
-import { ensureReferralAccount, isReferralCode, referralUrl, sendReferralEmail } from "@/lib/referrals";
+import { ensureReferralAccount, isReferralCode, referralCommissionPercent, referralUrl, sendReferralEmail } from "@/lib/referrals";
 import { getStripe } from "@/lib/stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -88,7 +88,7 @@ async function recordCommission(
     grossAmountCents: number;
   },
 ) {
-  const commissionPercent = values.paymentKind === "lifetime" ? 50 : 20;
+  const commissionPercent = referralCommissionPercent(values.plan);
   const commissionCents = Math.round(values.grossAmountCents * (commissionPercent / 100));
   if (commissionCents <= 0) return;
   const result = await admin.from("referral_commissions").insert({

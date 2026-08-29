@@ -83,7 +83,7 @@ create table if not exists public.referral_commissions (
   payment_kind text not null check (payment_kind in ('subscription', 'lifetime')),
   gross_amount_cents integer not null check (gross_amount_cents >= 0),
   commission_cents integer not null check (commission_cents >= 0),
-  commission_percent integer not null default 20 check (commission_percent in (20, 50)),
+  commission_percent integer not null default 40 check (commission_percent in (20, 40, 50)),
   status text not null default 'pending' check (status in ('pending', 'approved', 'paid', 'cancelled')),
   created_at timestamptz not null default now(),
   paid_at timestamptz
@@ -93,7 +93,9 @@ alter table public.referral_commissions
   drop constraint if exists referral_commissions_commission_percent_check;
 alter table public.referral_commissions
   add constraint referral_commissions_commission_percent_check
-  check (commission_percent in (20, 50));
+  check (commission_percent in (20, 40, 50));
+alter table public.referral_commissions
+  alter column commission_percent set default 40;
 
 create index if not exists referral_attributions_referrer_idx
   on public.referral_attributions (referrer_user_id, created_at desc);

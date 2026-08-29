@@ -15,7 +15,8 @@
 - nouveaux tarifs : Starter à 19,99 €/mois, Créateur à 34,99 €/mois et accès à vie à 250 € ;
 - promotion Starter à 10,99 €/mois jusqu’au 15 septembre 2026 à 23 h 59 (heure de Paris) ; les abonnés entrés pendant l’offre conservent ce tarif tant que leur abonnement reste actif ;
 - programme ambassadeur avec un lien personnel par client payant ;
-- commission de 20 % enregistrée à chaque mensualité payée pendant toute la durée de l’abonnement apporté ;
+- commission de 40 % enregistrée à chaque mensualité Starter pendant toute la durée de l’abonnement apporté ;
+- commission de 50 % enregistrée à chaque mensualité Créateur pendant toute la durée de l’abonnement apporté ;
 - commission unique de 50 % quand le client apporté choisit l’accès à vie ;
 - le lien et les commissions apparaissent dans le tableau de bord ;
 - le lien peut aussi être envoyé par e-mail avec Resend.
@@ -52,6 +53,10 @@ Exécuter `supabase/referral-program.sql` une fois dans le SQL Editor Supabase p
 Les nouveaux paiements Stripe utilisent directement les tarifs définis dans `lib/plans.ts`. Les anciennes variables `STRIPE_PRICE_*` ne sont donc plus nécessaires.
 
 Les commissions sont enregistrées avec le statut `pending`. Leur versement reste manuel tant qu’un système de paiement aux ambassadeurs, par exemple Stripe Connect, n’a pas été configuré. Après un paiement manuel, passer la commission concernée au statut `paid` et renseigner `paid_at` dans Supabase.
+
+## E-mail de réinitialisation du mot de passe
+
+Dans Supabase, ouvrir `Authentication → Emails → Templates → Reset password`, puis remplacer le contenu du modèle par celui de `supabase/reset-password-email-template.html`. Le jeton est placé après `#` pour empêcher les outils de prévisualisation des messageries de le consommer avant le clic réel de l’utilisateur.
 
 Le moteur produit des images WebP en `1152 × 2048` (9:16), qualité `medium`, à partir d’une photo principale et d’une référence facultative.
 

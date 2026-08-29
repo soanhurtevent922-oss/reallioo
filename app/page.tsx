@@ -23,7 +23,7 @@ const faq = [
   ["Combien de temps prend une création ?", "L’objectif est de produire une première version en quelques instants, puis de te laisser demander des variantes."],
   ["Mes créations sont-elles privées ?", "Tes images ne sont utilisées que pour générer ton résultat et restent accessibles depuis ton espace personnel."],
   ["Puis-je arrêter mon abonnement ?", "Oui. Toutes les formules sont sans engagement et peuvent être arrêtées depuis ton compte."],
-  ["Comment fonctionne le programme ambassadeur ?", "Dès que ton accès est actif, tu obtiens un lien personnel. Pour chaque client qui s’abonne depuis ce lien, tu gagnes 20 % de chaque mensualité tant que son abonnement reste actif. Si cette personne choisit l’accès à vie, tu gagnes 50 % du paiement unique."],
+  ["Comment fonctionne le programme ambassadeur ?", "Dès que ton accès est actif, tu obtiens un lien personnel. Tu gagnes 40 % de chaque mensualité Starter et 50 % de chaque mensualité Créateur tant que l’abonnement apporté reste actif. Si cette personne choisit l’accès à vie, tu gagnes 50 % du paiement unique."],
 ];
 
 const reactionExamples = [
@@ -141,15 +141,15 @@ export default function Home() {
       <section className="affiliate-section" id="ambassador">
         <div className="affiliate-layout">
           <div className="affiliate-copy">
-            <p>PROGRAMME AMBASSADEUR · 20 % RÉCURRENT · 50 % À VIE</p>
+            <p>PROGRAMME AMBASSADEUR · 40 % STARTER · 50 % CRÉATEUR</p>
             <h2>CRÉE.<br />PARTAGE.<br /><em>GAGNE À CHAQUE VENTE.</em></h2>
-            <span>Prends ton abonnement Reallioo et reçois ton lien personnel par e-mail. Chaque fois qu’un client s’abonne depuis ton lien, tu touches <strong>20 % de chaque mensualité</strong> pendant toute la durée de son abonnement. S’il choisit l’accès à vie, tu touches <strong>50 % du paiement unique</strong>.</span>
+            <span>Prends ton abonnement Reallioo et reçois ton lien personnel par e-mail. Tu touches <strong>40 % de chaque mensualité Starter</strong> et <strong>50 % de chaque mensualité Créateur</strong> pendant toute la durée de l’abonnement apporté. S’il choisit l’accès à vie, tu touches également <strong>50 % du paiement unique</strong>.</span>
             <a className="yellow-pill" href="#prices">Choisir mon offre <b>→</b></a>
           </div>
           <div className="affiliate-steps">
             <article><b>01</b><div><h3>PRENDS TON ACCÈS</h3><p>Choisis Starter, Créateur ou l’accès à vie.</p></div></article>
             <article><b>02</b><div><h3>PARTAGE TON LIEN</h3><p>Retrouve-le dans ton espace et reçois-le aussi par e-mail.</p></div></article>
-            <article><b>03</b><div><h3>20 % RÉCURRENT · 50 % À VIE</h3><p>20 % sur chaque mensualité active, ou 50 % sur l’accès à vie.</p></div></article>
+            <article><b>03</b><div><h3>40 % STARTER · 50 % CRÉATEUR</h3><p>40 % sur Starter, 50 % sur Créateur et 50 % sur l’accès à vie.</p></div></article>
           </div>
         </div>
       </section>

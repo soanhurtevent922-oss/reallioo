@@ -14,14 +14,47 @@ export default function ResetPasswordPage() {
 
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getUser().then(({ data }) => {
+    let active = true;
+
+    async function preparePasswordReset() {
+      const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+      const tokenHash = hash.get("token_hash");
+
+      if (tokenHash) {
+        const { data, error } = await supabase.auth.verifyOtp({
+          token_hash: tokenHash,
+          type: "recovery",
+        });
+
+        window.history.replaceState(null, "", "/reset-password");
+        if (!active) return;
+
+        if (!error && data.user) {
+          setReady(true);
+          setMessage("");
+          return;
+        }
+
+        setMessage("Ce lien a expiré ou n’est plus valide. Demande un nouveau lien.");
+        return;
+      }
+
+      const { data } = await supabase.auth.getUser();
+      if (!active) return;
+
       if (data.user) {
         setReady(true);
         setMessage("");
       } else {
         setMessage("Ce lien a expiré ou n’est plus valide. Demande un nouveau lien.");
       }
-    });
+
+    }
+
+    void preparePasswordReset();
+    return () => {
+      active = false;
+    };
   }, []);
 
   async function updatePassword(event: FormEvent<HTMLFormElement>) {

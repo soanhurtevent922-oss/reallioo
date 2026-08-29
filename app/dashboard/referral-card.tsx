@@ -26,7 +26,7 @@ export default function ReferralCard({
   return (
     <section className="referral-dashboard" id="ambassador">
       <div className="referral-dashboard-heading">
-        <div><p>20 % RÉCURRENT · 50 % SUR L’ACCÈS À VIE</p><h2>Ton lien personnel.</h2></div>
+        <div><p>40 % STARTER · 50 % CRÉATEUR ET À VIE</p><h2>Ton lien personnel.</h2></div>
         <span>{referrals} CLIENT{referrals > 1 ? "S" : ""} APPORTÉ{referrals > 1 ? "S" : ""}</span>
       </div>
       <div className="referral-link-row">
@@ -36,7 +36,7 @@ export default function ReferralCard({
       <div className="referral-stats">
         <div><small>COMMISSIONS EN ATTENTE</small><strong>{euro.format(pendingCents / 100)}</strong></div>
         <div><small>COMMISSIONS VERSÉES</small><strong>{euro.format(paidCents / 100)}</strong></div>
-        <p>Tu gagnes 20 % de chaque mensualité tant que l’abonnement apporté reste actif. L’accès à vie génère une commission unique de 50 %.</p>
+        <p>Tu gagnes 40 % de chaque mensualité Starter et 50 % de chaque mensualité Créateur tant que l’abonnement apporté reste actif. L’accès à vie génère une commission unique de 50 %.</p>
       </div>
     </section>
   );
