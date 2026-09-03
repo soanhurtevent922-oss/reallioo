@@ -1,6 +1,6 @@
 # Reallioo
 
-## Mise à jour du 25 août 2026
+## Mise à jour du 3 septembre 2026
 
 - animation des images du haut accélérée ;
 - libellé du bandeau simplifié en « RÉACTIONS DE LA COMMUNAUTÉ » ;
@@ -20,6 +20,8 @@
 - commission unique de 50 % quand le client apporté choisit l’accès à vie ;
 - le lien et les commissions apparaissent dans le tableau de bord ;
 - le lien peut aussi être envoyé par e-mail avec Resend.
+- les ambassadeurs peuvent enregistrer un IBAN chiffré depuis leur dashboard pour recevoir leurs commissions ;
+- une page administrateur protégée permet au propriétaire de préparer les virements manuels.
 
 SaaS B2C de création et de transformation d'images par IA.
 
@@ -40,6 +42,7 @@ NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 OPENAI_API_KEY=
+BANK_DETAILS_ENCRYPTION_KEY=
 RESEND_API_KEY=
 RESEND_FROM_EMAIL=Reallioo <ambassadeur@votre-domaine.com>
 ```
@@ -50,9 +53,15 @@ Exécuter également `supabase/purchase-activity.sql` une fois dans le SQL Edito
 
 Exécuter `supabase/referral-program.sql` une fois dans le SQL Editor Supabase pour créer les liens ambassadeurs, conserver l’attribution des clients et enregistrer les commissions.
 
+Exécuter `supabase/payout-bank-details.sql` une fois dans le SQL Editor Supabase pour créer le coffre des coordonnées bancaires.
+
+Créer ensuite une clé de chiffrement avec `openssl rand -base64 32`, puis ajouter le résultat dans Vercel sous le nom `BANK_DETAILS_ENCRYPTION_KEY` pour Production, Preview et Development. Conserver une copie sûre de cette clé : sans elle, les IBAN déjà enregistrés ne pourront plus être déchiffrés. Ne jamais préfixer cette variable par `NEXT_PUBLIC_`.
+
 Les nouveaux paiements Stripe utilisent directement les tarifs définis dans `lib/plans.ts`. Les anciennes variables `STRIPE_PRICE_*` ne sont donc plus nécessaires.
 
-Les commissions sont enregistrées avec le statut `pending`. Leur versement reste manuel tant qu’un système de paiement aux ambassadeurs, par exemple Stripe Connect, n’a pas été configuré. Après un paiement manuel, passer la commission concernée au statut `paid` et renseigner `paid_at` dans Supabase.
+Les commissions sont enregistrées avec le statut `pending`. Leur versement reste manuel tant qu’un système de paiement aux ambassadeurs, par exemple Stripe Connect, n’a pas été configuré. Le propriétaire retrouve les montants et les coordonnées bancaires dans `/admin/payouts`. Après un paiement manuel, passer la commission concernée au statut `paid` et renseigner `paid_at` dans Supabase.
+
+Les IBAN et BIC ne sont jamais enregistrés en clair : ils sont chiffrés en AES-256-GCM par le serveur avant d'être stockés. La table Supabase ne possède aucune règle d'accès pour les visiteurs ni pour les utilisateurs connectés ; seuls les endpoints serveur authentifiés et le compte administrateur peuvent y accéder.
 
 ## E-mail de réinitialisation du mot de passe
 

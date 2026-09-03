@@ -363,6 +363,52 @@ footer small { grid-column:1/-1; padding-top:25px; border-top:1px solid #202020;
 .referral-stats small { color:#8f8a69; font-size:9px; font-weight:900; letter-spacing:.1em; }
 .referral-stats strong { color:var(--yellow); font-size:27px; font-variant-numeric:tabular-nums; }
 .referral-stats p { margin:0; color:#aaa78d; font-size:12px; line-height:1.55; }
+.payout-bank-card { margin-top:24px; padding:24px; border:1px solid #393300; border-radius:22px; background:rgba(0,0,0,.38); }
+.payout-bank-heading { display:flex; align-items:center; justify-content:space-between; gap:20px; }
+.payout-bank-heading small,.payout-bank-saved small { color:#8f8a69; font-size:9px; font-weight:950; letter-spacing:.12em; }
+.payout-bank-heading h3 { margin:7px 0 0; font-size:23px; }
+.payout-bank-heading>span { padding:8px 11px; border-radius:999px; background:#282300; color:var(--yellow); font-size:9px; font-weight:950; }
+.payout-bank-explainer { max-width:800px; margin:15px 0 0; color:#aaa78d; font-size:12px; line-height:1.6; }
+.payout-bank-form { display:grid; grid-template-columns:1.1fr 1.4fr .7fr; gap:12px; margin-top:20px; }
+.payout-bank-form label { display:grid; gap:8px; color:#c4c1ad; font-size:11px; font-weight:850; }
+.payout-bank-form label small { color:#77745f; font-weight:700; }
+.payout-bank-form input { min-width:0; min-height:54px; padding:0 15px; border:1px solid #403900; border-radius:15px; background:#111; color:#fff; font:inherit; text-transform:uppercase; outline:none; }
+.payout-bank-form input:focus { border-color:var(--yellow); box-shadow:0 0 0 3px rgba(255,212,0,.09); }
+.payout-bank-form-actions { grid-column:1/-1; display:flex; justify-content:flex-end; gap:10px; }
+.payout-bank-form-actions>button { min-height:48px; padding:0 19px; border:1px solid #4a430d; border-radius:999px; background:transparent; color:#aaa78d; cursor:pointer; }
+.payout-bank-form-actions>.yellow-pill { min-height:48px; border:0; color:#050505; }
+.payout-bank-saved { display:grid; grid-template-columns:1fr 1fr auto; align-items:end; gap:18px; margin-top:20px; padding-top:18px; border-top:1px solid #2b280d; }
+.payout-bank-saved>div:not(.payout-bank-actions) { display:grid; gap:7px; }
+.payout-bank-saved strong { color:#f4f0d5; font-size:14px; word-break:break-word; }
+.payout-bank-actions { display:flex; gap:8px; }
+.payout-bank-actions button { padding:10px 13px; border:1px solid #494213; border-radius:999px; background:transparent; color:#c9c18c; cursor:pointer; }
+.payout-bank-actions button:last-child { color:#d28d8d; }
+.payout-bank-message { margin:14px 0 0; padding:11px 13px; border:1px solid #514900; border-radius:12px; background:#211e00; color:#ffe361; font-size:11px; font-weight:800; }
+
+.admin-payout-page { min-height:100vh; padding:55px max(24px,calc((100vw - 1180px)/2)); background:#f4f4ee; color:#0a0a0a; }
+.admin-payout-page>header { display:flex; align-items:end; justify-content:space-between; gap:25px; }
+.admin-payout-page>header p { margin:0 0 10px; color:#756500; font-size:11px; font-weight:950; letter-spacing:.15em; }
+.admin-payout-page>header h1 { margin:0; font-size:54px; letter-spacing:-.06em; }
+.admin-payout-page>header a { padding:13px 17px; border:1px solid #c8c6b9; border-radius:999px; background:#fff; font-size:12px; font-weight:850; }
+.admin-payout-summary { display:grid; grid-template-columns:repeat(2,minmax(0,240px)); gap:12px; margin-top:34px; }
+.admin-payout-summary>div { display:grid; gap:8px; padding:22px; border:1px solid #dddcd2; border-radius:20px; background:#fff; }
+.admin-payout-summary small,.admin-payout-amount small,.admin-bank-values small { color:#8b8878; font-size:9px; font-weight:950; letter-spacing:.12em; }
+.admin-payout-summary strong { font-size:28px; }
+.admin-payout-list { display:grid; gap:14px; margin-top:24px; }
+.admin-payout-list>article { display:grid; grid-template-columns:minmax(220px,1fr) 160px minmax(320px,1.3fr); align-items:center; gap:22px; padding:25px; border:1px solid #dddcd2; border-radius:25px; background:#fff; }
+.admin-payout-person>span { color:#806e00; font-size:9px; font-weight:950; letter-spacing:.12em; }
+.admin-payout-person h2 { margin:9px 0 6px; font-size:22px; }
+.admin-payout-person p { margin:0; color:#777; font-size:12px; }
+.admin-payout-amount { display:grid; gap:8px; }
+.admin-payout-amount strong { color:#8b7600; font-size:24px; }
+.admin-bank-values { display:grid; grid-template-columns:1.3fr .7fr; gap:10px; }
+.admin-bank-values>div { display:grid; gap:7px; padding:13px; border-radius:14px; background:#f1f0e8; }
+.admin-bank-values code { overflow-wrap:anywhere; color:#24231d; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12px; }
+.admin-bank-values button { width:max-content; padding:6px 9px; border:0; border-radius:999px; background:#171710; color:#fff; font-size:9px; font-weight:850; cursor:pointer; }
+.admin-bank-values>p { grid-column:1/-1; margin:0; color:#999; font-size:10px; }
+.admin-bank-missing { padding:16px; border:1px solid #dfc9a4; border-radius:15px; background:#fff8e8; color:#896119; font-size:12px; line-height:1.5; }
+.admin-payout-empty { padding:30px; border:1px solid #dddcd2; border-radius:24px; background:#fff; color:#777; }
+.admin-payout-warning { margin:20px 0 0; color:#8a887d; font-size:11px; line-height:1.5; }
 
 @media (max-width:800px) {
   .auth-logo { top:20px; left:22px; }
@@ -391,6 +437,15 @@ footer small { grid-column:1/-1; padding-top:25px; border-top:1px solid #202020;
   .referral-link-row input { min-height:58px; }
   .referral-stats { grid-template-columns:1fr 1fr; }
   .referral-stats p { grid-column:1/-1; }
+  .payout-bank-heading,.payout-bank-saved { align-items:flex-start; grid-template-columns:1fr; flex-direction:column; }
+  .payout-bank-form { grid-template-columns:1fr; }
+  .admin-payout-page { padding:28px 14px; }
+  .admin-payout-page>header { align-items:flex-start; flex-direction:column; }
+  .admin-payout-page>header h1 { font-size:42px; }
+  .admin-payout-summary { grid-template-columns:1fr 1fr; }
+  .admin-payout-list>article { grid-template-columns:1fr; }
+  .admin-bank-values { grid-template-columns:1fr; }
+  .admin-bank-values>p { grid-column:auto; }
 }
 
 @media (max-width:520px) {

@@ -43,14 +43,21 @@ export default async function DashboardPage() {
   const planName = profile?.is_admin ? "ADMIN" : (profile?.plan || "free").toUpperCase();
   const credits = profile?.is_admin ? null : Number(profile?.credits_remaining ?? 0);
   const hasPaidAccess = Boolean(profile?.is_admin || (profile?.plan && profile.plan !== "free"));
-  let referralData: { link: string; referrals: number; pendingCents: number; paidCents: number } | null = null;
+  let referralData: {
+    link: string;
+    referrals: number;
+    pendingCents: number;
+    paidCents: number;
+    bankDetails: { configured: boolean; accountHolderName?: string; maskedIban?: string };
+  } | null = null;
 
   if (hasPaidAccess) {
     try {
       const account = await ensureReferralAccount(admin, userId);
-      const [{ count }, { data: commissions }] = await Promise.all([
+      const [{ count }, { data: commissions }, { data: bank }] = await Promise.all([
         admin.from("referral_attributions").select("referred_user_id", { count: "exact", head: true }).eq("referrer_user_id", userId),
         admin.from("referral_commissions").select("commission_cents, status").eq("referrer_user_id", userId),
+        admin.from("payout_bank_details").select("account_holder_name, iban_country, iban_last4").eq("user_id", userId).maybeSingle(),
       ]);
       const totals = (commissions || []).reduce((result, commission) => {
         const amount = Number(commission.commission_cents || 0);
@@ -58,7 +65,18 @@ export default async function DashboardPage() {
         if (commission.status === "pending" || commission.status === "approved") result.pendingCents += amount;
         return result;
       }, { pendingCents: 0, paidCents: 0 });
-      referralData = { link: referralUrl(account.code), referrals: count || 0, ...totals };
+      referralData = {
+        link: referralUrl(account.code),
+        referrals: count || 0,
+        ...totals,
+        bankDetails: bank
+          ? {
+              configured: true,
+              accountHolderName: bank.account_holder_name,
+              maskedIban: `${bank.iban_country}•• •••• •••• •••• •••• ${bank.iban_last4}`,
+            }
+          : { configured: false },
+      };
     } catch (error) {
       console.error("Referral dashboard unavailable", error);
     }
@@ -88,7 +106,11 @@ export default async function DashboardPage() {
 
         <div className="dashboard-plan" id="plan">
           <div><p>TON ACCÈS</p><h2>{planName}</h2><span>{profile?.is_admin ? "Accès propriétaire illimité" : `${credits ?? 0} crédits disponibles`}</span></div>
-          {profile?.plan && profile.plan !== "free" && profile.plan !== "lifetime" ? <form action="/api/stripe/portal" method="post"><button className="outline-pill" type="submit">Gérer mon abonnement →</button></form> : <a className="yellow-pill" href="/#prices">Voir les offres →</a>}
+          {profile?.is_admin
+            ? <a className="yellow-pill" href="/admin/payouts">Gérer les virements →</a>
+            : profile?.plan && profile.plan !== "free" && profile.plan !== "lifetime"
+              ? <form action="/api/stripe/portal" method="post"><button className="outline-pill" type="submit">Gérer mon abonnement →</button></form>
+              : <a className="yellow-pill" href="/#prices">Voir les offres →</a>}
         </div>
       </section>
     </main>

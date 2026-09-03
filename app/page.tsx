@@ -24,6 +24,7 @@ const faq = [
   ["Mes créations sont-elles privées ?", "Tes images ne sont utilisées que pour générer ton résultat et restent accessibles depuis ton espace personnel."],
   ["Puis-je arrêter mon abonnement ?", "Oui. Toutes les formules sont sans engagement et peuvent être arrêtées depuis ton compte."],
   ["Comment fonctionne le programme ambassadeur ?", "Dès que ton accès est actif, tu obtiens un lien personnel. Tu gagnes 40 % de chaque mensualité Starter et 50 % de chaque mensualité Créateur tant que l’abonnement apporté reste actif. Si cette personne choisit l’accès à vie, tu gagnes 50 % du paiement unique."],
+  ["Comment recevoir mes commissions ?", "Ajoute ton IBAN depuis ton espace ambassadeur. Il est chiffré et utilisé uniquement par Reallioo pour effectuer le virement de tes commissions. Aucun prélèvement n’est effectué sur ton compte."],
 ];
 
 const reactionExamples = [
@@ -150,6 +151,7 @@ export default function Home() {
             <article><b>01</b><div><h3>PRENDS TON ACCÈS</h3><p>Choisis Starter, Créateur ou l’accès à vie.</p></div></article>
             <article><b>02</b><div><h3>PARTAGE TON LIEN</h3><p>Retrouve-le dans ton espace et reçois-le aussi par e-mail.</p></div></article>
             <article><b>03</b><div><h3>40 % STARTER · 50 % CRÉATEUR</h3><p>40 % sur Starter, 50 % sur Créateur et 50 % sur l’accès à vie.</p></div></article>
+            <article><b>04</b><div><h3>REÇOIS TES COMMISSIONS</h3><p>Ajoute ton IBAN chiffré depuis ton espace. Il sert uniquement au versement de tes gains, jamais à un prélèvement.</p></div></article>
           </div>
         </div>
       </section>
